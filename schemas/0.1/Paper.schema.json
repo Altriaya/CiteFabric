@@ -1,0 +1,59 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "created_at": {
+      "title": "Created At",
+      "type": "string"
+    },
+    "edition_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Edition Ids",
+      "type": "array"
+    },
+    "fabric_id": {
+      "title": "Fabric Id",
+      "type": "string"
+    },
+    "identity_status": {
+      "default": "unresolved",
+      "enum": [
+        "verified",
+        "unresolved",
+        "conflict",
+        "user_asserted"
+      ],
+      "title": "Identity Status",
+      "type": "string"
+    },
+    "preferred_edition_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Preferred Edition Id"
+    },
+    "relations": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Relations",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "0.1",
+      "default": "0.1",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "title": "Paper",
+  "type": "object"
+}

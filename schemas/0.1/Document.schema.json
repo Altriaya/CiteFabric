@@ -1,0 +1,82 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "access": {
+      "additionalProperties": true,
+      "title": "Access",
+      "type": "object"
+    },
+    "binding": {
+      "additionalProperties": true,
+      "title": "Binding",
+      "type": "object"
+    },
+    "byte_length": {
+      "minimum": 0,
+      "title": "Byte Length",
+      "type": "integer"
+    },
+    "document_id": {
+      "title": "Document Id",
+      "type": "string"
+    },
+    "edition_id": {
+      "title": "Edition Id",
+      "type": "string"
+    },
+    "media_type": {
+      "title": "Media Type",
+      "type": "string"
+    },
+    "retrieval_event_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Retrieval Event Ids",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "0.1",
+      "default": "0.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_hash": {
+      "title": "Source Hash",
+      "type": "string"
+    },
+    "source_kind": {
+      "default": "full_text",
+      "enum": [
+        "full_text",
+        "abstract",
+        "user_text"
+      ],
+      "title": "Source Kind",
+      "type": "string"
+    },
+    "version_label": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Version Label"
+    }
+  },
+  "required": [
+    "edition_id",
+    "media_type",
+    "byte_length",
+    "source_hash",
+    "binding",
+    "access",
+    "retrieval_event_ids"
+  ],
+  "title": "Document",
+  "type": "object"
+}

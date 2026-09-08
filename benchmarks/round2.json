@@ -1,0 +1,955 @@
+{
+  "schema_version": 1,
+  "annotation_date": "2026-09-08",
+  "annotation_method": "Round 2: 20 existing development cases + 18 new transfer cases prepared before retrieval changes; assistant reviewed, not blinded or independently annotated.",
+  "page_numbering": "1-based physical PDF pages",
+  "papers": [
+    {
+      "key": "backtime",
+      "filename": "Lin 等 - 2024 - BACKTIME Backdoor Attacks on Multivariate Time Series Forecasting.pdf",
+      "sha256": "f01d41cb571e90a898efc3205e711ece7173239de795417ce66333bdd641c0af",
+      "pages": 17,
+      "title": "BACKTIME: Backdoor Attacks on Multivariate Time Series Forecasting",
+      "year": 2024,
+      "arxiv": "2410.02195",
+      "version": "v1",
+      "authors": [
+        "Xiao Lin",
+        "Zhining Liu",
+        "Dongqi Fu",
+        "Ruizhong Qiu",
+        "Hanghang Tong"
+      ],
+      "metadata_basis": "Transcribed from the supplied PDF first page; not independently verified by an online registry."
+    },
+    {
+      "key": "tdba",
+      "filename": "Liu 等 - 2026 - Beyond Immediate Activation Temporally Decoupled Backdoor Attacks on Time Series Forecasting.pdf",
+      "sha256": "e1eb66ca653b6b9724cef93835049e06094421cb7aec24adefc7a87c689ff3f6",
+      "pages": 9,
+      "title": "Beyond Immediate Activation: Temporally Decoupled Backdoor Attacks on Time Series Forecasting",
+      "year": 2026,
+      "arxiv": "2601.04247",
+      "version": "v1",
+      "authors": [
+        "Zhixin Liu",
+        "Xuanlin Liu",
+        "Sihan Xu",
+        "Yaqiong Qiao",
+        "Ying Zhang",
+        "Xiangrui Cai"
+      ],
+      "metadata_basis": "Transcribed from the supplied PDF first page; not independently verified by an online registry."
+    },
+    {
+      "key": "timeguard",
+      "filename": "Nguyen 等 - 2026 - TimeGuard Channel-wise Pool Training for Backdoor Defense in Time Series Forecasting.pdf",
+      "sha256": "d38f4a9260796a494f79de761bb3e2a8d327a2baeaffe8501b4a66074f8f0cec",
+      "pages": 44,
+      "title": "TimeGuard: Channel-wise Pool Training for Backdoor Defense in Time Series Forecasting",
+      "year": 2026,
+      "arxiv": "2605.22365",
+      "version": "v2",
+      "authors": [
+        "Quang Duc Nguyen",
+        "Siyuan Liang",
+        "Yiming Li",
+        "Fushuo Huo",
+        "Dacheng Tao"
+      ],
+      "metadata_basis": "Transcribed from the supplied PDF first page; not independently verified by an online registry."
+    },
+    {
+      "key": "attention",
+      "filename": "attention.pdf",
+      "sha256": "bdfaa68d8984f0dc02beaca527b76f207d99b666d31d1da728ee0728182df697",
+      "pages": 15,
+      "title": "Attention Is All You Need",
+      "year": 2017,
+      "authors": [
+        "Ashish Vaswani",
+        "Noam Shazeer",
+        "Niki Parmar",
+        "Jakob Uszkoreit",
+        "Llion Jones",
+        "Aidan N. Gomez",
+        "Łukasz Kaiser",
+        "Illia Polosukhin"
+      ],
+      "arxiv": "1706.03762",
+      "version": "v7",
+      "doi": null,
+      "kind": "preprint",
+      "source_url": "https://arxiv.org/pdf/1706.03762v7",
+      "metadata_basis": "Locally curated from the downloaded primary paper; explicit import, not independently verified identity. LIGO credited by collaboration; individual author list is not expanded."
+    },
+    {
+      "key": "ligo",
+      "filename": "ligo.pdf",
+      "sha256": "e5e864c23d015b69be17e5b5d51b5b462d2829353a867513414b6728f54589c4",
+      "pages": 16,
+      "title": "Observation of Gravitational Waves from a Binary Black Hole Merger",
+      "year": 2016,
+      "authors": [
+        "LIGO Scientific Collaboration",
+        "Virgo Collaboration"
+      ],
+      "arxiv": null,
+      "version": null,
+      "doi": "10.1103/PhysRevLett.116.061102",
+      "kind": "journal-article",
+      "source_url": "https://arxiv.org/pdf/1602.03837v1",
+      "metadata_basis": "Locally curated from the downloaded primary paper; explicit import, not independently verified identity. LIGO credited by collaboration; individual author list is not expanded."
+    },
+    {
+      "key": "alphafold",
+      "filename": "alphafold.pdf",
+      "sha256": "6c5bfae2ca00734cdaca8739c8fa123d9c247008f409b34e1cd4d5cf8bf4b7c2",
+      "pages": 10,
+      "title": "Highly accurate protein structure prediction with AlphaFold",
+      "year": 2021,
+      "authors": [
+        "John Jumper",
+        "Richard Evans",
+        "Alexander Pritzel",
+        "Tim Green",
+        "Michael Figurnov",
+        "Olaf Ronneberger",
+        "Kathryn Tunyasuvunakool",
+        "Russ Bates",
+        "Augustin Žídek",
+        "Anna Potapenko",
+        "Alex Bridgland",
+        "Clemens Meyer",
+        "Simon A. A. Kohl",
+        "Andrew J. Ballard",
+        "Andrew Cowie",
+        "Bernardino Romera-Paredes",
+        "Stanislav Nikolov",
+        "Rishub Jain",
+        "Jonas Adler",
+        "Trevor Back",
+        "Stig Petersen",
+        "David Reiman",
+        "Ellen Clancy",
+        "Michal Zielinski",
+        "Martin Steinegger",
+        "Michalina Pacholska",
+        "Tamas Berghammer",
+        "Sebastian Bodenstein",
+        "David Silver",
+        "Oriol Vinyals",
+        "Andrew W. Senior",
+        "Koray Kavukcuoglu",
+        "Pushmeet Kohli",
+        "Demis Hassabis"
+      ],
+      "arxiv": null,
+      "version": null,
+      "doi": "10.1038/s41586-021-03819-2",
+      "kind": "journal-article",
+      "source_url": "https://dasher.wustl.edu/bio5357/readings/nature-596-583-21.pdf",
+      "metadata_basis": "Locally curated from the downloaded primary paper; explicit import, not independently verified identity. LIGO credited by collaboration; individual author list is not expanded."
+    }
+  ],
+  "cases": [
+    {
+      "id": "Q01",
+      "paper": "backtime",
+      "question_zh": "BACKTIME 用什么框架建模变量关系和生成触发器？",
+      "claim_zh": "BACKTIME 使用双层优化框架及基于变量关系的 GNN 触发器生成器。",
+      "retrieval_query_en": "bi-level optimization GNN inter-variable correlations",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 2 页贡献部分明确说明双层优化及 GNN 生成器；这一论断仅描述论文方法。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 2,
+          "anchors": [
+            "bi-level optimization framework",
+            "inter-variable",
+            "GNN-based trigger generator"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "cohort": "development"
+    },
+    {
+      "id": "Q02",
+      "paper": "backtime",
+      "question_zh": "BACKTIME 使用哪五个数据集，如何划分？",
+      "claim_zh": "实验使用 PEMS03、PEMS04、PEMS08、Weather、ETTm1，训练/验证/测试比例为 60%/20%/20%。",
+      "retrieval_query_en": "Datasets weather ETTm1 splits train validation test",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 8 页实验设置列出这五个数据集及 60%/20%/20% 划分。注意是 ETTm1。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 8,
+          "anchors": [
+            "PEMS03",
+            "PEMS04",
+            "PEMS08",
+            "ETTm1",
+            "60%/20%/20%"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "cohort": "development"
+    },
+    {
+      "id": "Q03",
+      "paper": "backtime",
+      "question_zh": "攻击指标 MAE_A 应该越大越好吗？",
+      "claim_zh": "BACKTIME 的 MAE_A 越大，攻击越成功。",
+      "retrieval_query_en": "Metrics attack effectiveness Mean Absolute Error target pattern lower better",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "MAE_A 衡量预测与目标模式之间的误差，越低表示越贴近攻击目标；第 8 页明确说明所有所列误差指标越低越好。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 8,
+          "anchors": [
+            "Metrics.",
+            "the lower, the better"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "cohort": "development"
+    },
+    {
+      "id": "Q04",
+      "paper": "backtime",
+      "question_zh": "表 2 中 PEMS03 的平均 MAE_A 是多少？",
+      "claim_zh": "在表 2 的 PEMS03 Average 行，Clean 的 MAE_A 为 35.62，BACKTIME 为 17.52。",
+      "retrieval_query_en": "PEMS03 Average Clean BACKTIME main results",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "表 2 的两个数值分别为 35.62 和 17.52，约下降 50.81%。Clean 列的攻击指标使用干净输入，不能当成同输入条件下的比较。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 8,
+          "anchors": [
+            "Average 17.27 35.62",
+            "18.23 17.52"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "scope_note_zh": "需要同时核对表头、Average 行，以及正文对 Clean 输入条件的说明。",
+      "cohort": "development"
+    },
+    {
+      "id": "Q05",
+      "paper": "backtime",
+      "question_zh": "BACKTIME 是否在所有数据集上都改善干净预测？",
+      "claim_zh": "相较 Clean，BACKTIME 在表 2 的每个数据集上都降低了平均 MAE_C。",
+      "retrieval_query_en": "clean natural forecasting ability PEMS03 Average",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "PEMS03 平均 MAE_C 从 Clean 的 17.27 上升到 BACKTIME 的 18.23，已经构成反例；不能把“有竞争力”改写为“处处改善”。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 8,
+          "anchors": [
+            "Average 17.27 35.62",
+            "18.23 17.52"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "cohort": "development"
+    },
+    {
+      "id": "Q06",
+      "paper": "backtime",
+      "question_zh": "异常检测表中的 AUC 是否全都恰好等于随机猜测？",
+      "claim_zh": "表 4 中所有检测器在所有数据集上的 AUC 都严格等于 0.5。",
+      "retrieval_query_en": "GDN USAD Weather F1-score AUC anomaly detection",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "表 4 的数值并不都等于 0.5，例如 Weather 上 GDN 的 AUC 为 0.6450。“接近随机猜测”不能等同于数值严格相等，也不能推出所有检测器均不可检测。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 9,
+          "anchors": [
+            "GDN",
+            "0.6450"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "cohort": "development"
+    },
+    {
+      "id": "Q07",
+      "paper": "backtime",
+      "question_zh": "文中是否报告了医院部署后患者结局改善？",
+      "claim_zh": "BACKTIME 已在医院前瞻性部署中证明改善患者结局。",
+      "retrieval_query_en": "hospital prospective deployment patient outcomes epidemiology",
+      "expected_verdict": "insufficient",
+      "reference_answer_zh": "未找到医院前瞻性部署或患者结局的直接实验证据。摘要/引言列举流行病学应用领域，不能支持这一临床部署论断。",
+      "evidence_kind": "prose",
+      "gold": [],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "scope_note_zh": "无正向证据锚点；未检索到不等于证明现实世界从未发生过。核查范围仅为用户提供的这一版本。",
+      "cohort": "development"
+    },
+    {
+      "id": "Q08",
+      "paper": "tdba",
+      "question_zh": "TDBA 能否让不同变量在不同延迟位置激活目标模式？",
+      "claim_zh": "TDBA 支持变量特定的延迟与异步激活，并使用位置引导生成和位置感知优化两个模块。",
+      "retrieval_query_en": "delayed asynchronous position-guided generation position-aware optimization modules",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 2 页明确说明两个模块及跨变量延迟、异步激活的目标。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 2,
+          "anchors": [
+            "delayed and asynchronous",
+            "position-guided trigger generation",
+            "position-aware optimization"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "cohort": "development"
+    },
+    {
+      "id": "Q09",
+      "paper": "tdba",
+      "question_zh": "TDBA 的电力变压器数据集是哪一个？",
+      "claim_zh": "TDBA 与 BACKTIME 一样使用 ETTm1 作为文中列出的变压器数据集。",
+      "retrieval_query_en": "Datasets Weather PEMS ETTh1 ETTm1",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "TDBA 第 5 页和表 1 写的是 ETTh1；BACKTIME 第 8 页写的是 ETTm1，不能混为同一数据集。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 5,
+          "anchors": [
+            "ETTh1",
+            "Datasets."
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "cohort": "development"
+    },
+    {
+      "id": "Q10",
+      "paper": "tdba",
+      "question_zh": "Weather 上 TDBA-Inv 与 BACKTIME 的平均攻击误差分别是多少？",
+      "claim_zh": "表 1 中 Weather 的平均 M_p^a 从 BACKTIME 的 23.22 降至 TDBA-Inv 的 3.48。",
+      "retrieval_query_en": "Weather Average BackTime TDBA-Inv performance",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 6 页表 1 对应值为 23.22 和 3.48，下降约 85.01%；限定为 Weather、cone 目标模式和表中模型均值。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 6,
+          "anchors": [
+            "23.22",
+            "3.48"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "cohort": "development"
+    },
+    {
+      "id": "Q11",
+      "paper": "tdba",
+      "question_zh": "TDBA-Gcn 是否在五个数据集的平均攻击误差上全部优于 BACKTIME？",
+      "claim_zh": "TDBA-Gcn 在表 1 的每个数据集上平均 M_p^a 都低于 BACKTIME。",
+      "retrieval_query_en": "ETTh1 Average BackTime TDBA-Gcn performance",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "ETTh1 行中 TDBA-Gcn 的平均 M_p^a 为 2.90，而 BACKTIME 为 2.74；越低越好的指标在此没有改善。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 6,
+          "anchors": [
+            "ETTh1 Average",
+            "2.74",
+            "2.90"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "cohort": "development"
+    },
+    {
+      "id": "Q12",
+      "paper": "tdba",
+      "question_zh": "论文是否已经实现同一次训练学习多个目标模式？",
+      "claim_zh": "TDBA 已解决多目标模式联合训练和跨领域迁移问题。",
+      "retrieval_query_en": "limitations single target pattern training cross-domain transferability future",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "第 7 页结论将单目标模式训练、有限跨领域迁移列为当前限制，并把多目标模式学习列为未来工作。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 7,
+          "anchors": [
+            "single target pattern training",
+            "limited cross-domain",
+            "Future work will explore"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "cohort": "development"
+    },
+    {
+      "id": "Q13",
+      "paper": "tdba",
+      "question_zh": "PEMS04 上 TDBA-GCN 的 USAD 检测结果是多少？",
+      "claim_zh": "表 4 报告 TDBA-GCN 在 PEMS04 上的 USAD AUC-ROC 为 0.4961。",
+      "retrieval_query_en": "USAD anomaly detection PEMS04 TDBA-GCN AUC",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 7 页表 4 为 0.4961；限于该检测器、数据集和实验协议，不能推广为所有检测器均无效。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 7,
+          "anchors": [
+            "TDBA-GCN 0.5313 0.4961"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "cohort": "development"
+    },
+    {
+      "id": "Q14",
+      "paper": "timeguard",
+      "question_zh": "TimeGuard 评估了多少种已有防御，发现哪两个问题？",
+      "claim_zh": "TimeGuard 评估了 13 种代表性防御，并指出通道级信号稀释与训练损失退化。",
+      "retrieval_query_en": "thirteen defenses channel signal dilution training loss degeneration",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 1 页摘要说明 13 种防御及两个问题；第 4 页进一步分为 10 种训练阶段和 3 种推理阶段防御。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 1,
+          "anchors": [
+            "thirteen representative backdoor de-",
+            "signal dilution",
+            "training-loss degeneration"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "cohort": "development"
+    },
+    {
+      "id": "Q15",
+      "paper": "timeguard",
+      "question_zh": "初始可靠池如何合并 RCF 与 NDF 的选择结果？",
+      "claim_zh": "TimeGuard 将 RCF 与 NDF 选出的样本取并集，构建初始可靠池。",
+      "retrieval_query_en": "initial reliable pool RCF NDF intersecting selections",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "第 6 页图 4 和正文说明取交集，不是并集；两项筛选都通过才进入初始可靠池。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 6,
+          "anchors": [
+            "intersecting samples",
+            "Reverse-",
+            "Neighborhood Diversity Filtering"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "cohort": "development"
+    },
+    {
+      "id": "Q16",
+      "paper": "timeguard",
+      "question_zh": "只看到 MAE_P 增大能否判定防御更好？",
+      "claim_zh": "TimeGuard 要求维持较低 MAE_C，同时提高 MAE_P；FDER 用于惩罚干净性能退化造成的虚假收益。",
+      "retrieval_query_en": "Evaluation metrics false wins FDER clean performance degradation",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 4 页定义指出，模型整体退化也可能推高 MAE_P，因此需要同时查看干净性能，并使用 FDER 衡量折中。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 4,
+          "anchors": [
+            "false",
+            "overall forecasting quality degrades",
+            "penalizing clean-performance degradation"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "cohort": "development"
+    },
+    {
+      "id": "Q17",
+      "paper": "timeguard",
+      "question_zh": "PEMS03/BackTime 条件下 TimeGuard 带来多大误差变化？",
+      "claim_zh": "表 3 中 MAE_P 从 14.201 提升至 39.303，同时 MAE_C 从 17.607 变为 18.048。",
+      "retrieval_query_en": "PEMS03 BackTime No Defense TIMEGUARD main results",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 7 页表 3 显示 MAE_P 为原来的约 2.768 倍，MAE_C 上升约 2.505%。这是三种模型均值，不能改成每个模型都满足同样幅度。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 7,
+          "anchors": [
+            "17.607 14.201",
+            "18.048 39.303"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "cohort": "development"
+    },
+    {
+      "id": "Q18",
+      "paper": "timeguard",
+      "question_zh": "TimeGuard 初始化是否需要额外可信干净参考集？",
+      "claim_zh": "TimeGuard 的 Stage I 无需任何额外干净参考集即可初始化可靠池。",
+      "retrieval_query_en": "Stage I initialize reliable pool without clean reference set",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 6 页 4.2 节明确说明 without any clean reference set；这不代表完全不需要训练数据。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 6,
+          "anchors": [
+            "without any clean reference set"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "cohort": "development"
+    },
+    {
+      "id": "Q19",
+      "paper": "timeguard",
+      "question_zh": "没有推理开销是否意味着没有训练开销？",
+      "claim_zh": "TimeGuard 相比普通训练既没有额外推理开销，也没有额外训练开销。",
+      "retrieval_query_en": "Efficiency training time overhead inference Table 6",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "第 9 页报告无额外推理开销，但平均训练时间为 3372 秒对 2134 秒，约 1.58 倍；总训练时间是原来的 158%，增加约 58%。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 9,
+          "anchors": [
+            "3372",
+            "2134",
+            "no inference-time overhead"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "cohort": "development"
+    },
+    {
+      "id": "Q20",
+      "paper": "timeguard",
+      "question_zh": "是否能从论文推出对任意未来自适应攻击的完美防御保证？",
+      "claim_zh": "TimeGuard 已证明对所有未来自适应攻击都能实现 100% 防御。",
+      "retrieval_query_en": "Limitations adaptive attacks distribution shifts precision recall trade-off",
+      "expected_verdict": "insufficient",
+      "reference_answer_zh": "没有这种普遍保证。第 44 页明确讨论手工邻域度量、分布漂移及触发模式接近常见动态时的精确率/召回率折中；第 9 页有限自适应实验不能证明所有未来攻击均可被阻断。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 44,
+          "anchors": [
+            "precision–recall trade-off",
+            "distribution shifts"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "scope_note_zh": "这里的 insufficient 表示普遍量化结论未被证明；局部实验或有限假设下的理论不支持它。",
+      "cohort": "development"
+    },
+    {
+      "id": "Q21",
+      "paper": "attention",
+      "question_zh": "Transformer 的网络结构是否依赖循环和卷积？",
+      "claim_zh": "论文提出的 Transformer 去除了循环与卷积，主要依靠注意力机制。",
+      "retrieval_query_en": "Transformer architecture attention recurrence convolutions",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "摘要明确说明架构仅基于注意力，不使用循环和卷积；这是该论文的架构描述。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 1,
+          "anchors": [
+            "based solely on attention mechanisms",
+            "dispensing with recurrence and convolutions"
+          ]
+        }
+      ],
+      "review_basis": "Assistant review of PDF text and rendered relevant pages; transfer case, not used as a runtime query mapping.",
+      "cohort": "transfer"
+    },
+    {
+      "id": "Q22",
+      "paper": "attention",
+      "question_zh": "表 2 中基础和大型模型的英德翻译 BLEU 分数分别是多少？",
+      "claim_zh": "表 2 的 EN-DE 中，基础模型为 27.3 BLEU，大型模型为 28.4 BLEU。",
+      "retrieval_query_en": "Table 2 Transformer base big BLEU English German",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "表 2 的 base/big、EN-DE 两行列分别给出 27.3/28.4，不能拿 EN-FR 列或开发集表 3 的值替换。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 8,
+          "anchors": [
+            "Transformer (base model) 27.3",
+            "Transformer (big) 28.4"
+          ]
+        }
+      ],
+      "review_basis": "Assistant review of PDF text and rendered relevant pages; transfer case, not used as a runtime query mapping.",
+      "cohort": "transfer"
+    },
+    {
+      "id": "Q23",
+      "paper": "attention",
+      "question_zh": "全文对大型模型英法翻译的 BLEU 分数是否一致？",
+      "claim_zh": "这份 PDF 的表 2 与正文都一致报告英法 BLEU 为 41.8。",
+      "retrieval_query_en": "English French BLEU big Table 2 translation results",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "第 8 页表 2 写 41.8，而同页 6.1 正文写 41.0；这是文件内部冲突，不能未经额外依据自行把其中一个改成另一个。",
+      "evidence_kind": "source_conflict",
+      "gold": [
+        {
+          "page": 8,
+          "anchors": [
+            "Transformer (big) 28.4 41.8",
+            "BLEU score of 41.0"
+          ]
+        }
+      ],
+      "review_basis": "Assistant review of PDF text and rendered relevant pages; transfer case, not used as a runtime query mapping.",
+      "cohort": "transfer"
+    },
+    {
+      "id": "Q24",
+      "paper": "attention",
+      "question_zh": "位置编码是否只能使用正弦函数，不能学习？",
+      "claim_zh": "论文实验发现可学习位置编码无法替代正弦位置编码。",
+      "retrieval_query_en": "learned positional embeddings sinusoidal nearly identical results",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "第 6 页报告可学习版本与正弦版本效果几乎相同；选择正弦的动机包含长度外推的假设。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 6,
+          "anchors": [
+            "learned positional embeddings",
+            "nearly identical results"
+          ]
+        }
+      ],
+      "review_basis": "Assistant review of PDF text and rendered relevant pages; transfer case, not used as a runtime query mapping.",
+      "cohort": "transfer"
+    },
+    {
+      "id": "Q25",
+      "paper": "attention",
+      "question_zh": "表 3 的模型变体结果属于测试集还是开发集？",
+      "claim_zh": "表 3 的全部结果都在 newstest2014 测试集上计算。",
+      "retrieval_query_en": "Table 3 variations development set newstest2013 metrics",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "表 3 表注明确写 English-to-German development set, newstest2013；不能与表 2 的测试集成绩混用。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 9,
+          "anchors": [
+            "development set, newstest2013",
+            "All metrics"
+          ]
+        }
+      ],
+      "review_basis": "Assistant review of PDF text and rendered relevant pages; transfer case, not used as a runtime query mapping.",
+      "cohort": "transfer"
+    },
+    {
+      "id": "Q26",
+      "paper": "attention",
+      "question_zh": "标准自注意力每层复杂度对序列长度是线性的吗？",
+      "claim_zh": "标准 Self-Attention 每层计算复杂度随序列长度 n 线性增长。",
+      "retrieval_query_en": "Self-Attention complexity per layer sequence length sequential operations",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "表 1 标准自注意力复杂度为 O(n²·d)，不是关于 n 的线性复杂度；O(1) 指顺序操作数/最大路径长度，不是总计算复杂度。",
+      "evidence_kind": "formula",
+      "gold": [
+        {
+          "page": 6,
+          "anchors": [
+            "Self-Attention O(n2·d)",
+            "Sequential"
+          ]
+        }
+      ],
+      "review_basis": "Assistant review of PDF text and rendered relevant pages; transfer case, not used as a runtime query mapping.",
+      "cohort": "transfer"
+    },
+    {
+      "id": "Q27",
+      "paper": "ligo",
+      "question_zh": "首次事件是在什么时候被观测到的？",
+      "claim_zh": "GW150914 的观测时刻为 2015-09-14 09:50:45 UTC。",
+      "retrieval_query_en": "GW150914 observed September UTC detectors",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第一页摘要给出该观测时刻；论文发表日期 2016 年不能替代事件日期。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 1,
+          "anchors": [
+            "September 14, 2015 at 09:50:45 UTC"
+          ]
+        }
+      ],
+      "review_basis": "Assistant review of PDF text and rendered relevant pages; transfer case, not used as a runtime query mapping.",
+      "cohort": "transfer"
+    },
+    {
+      "id": "Q28",
+      "paper": "ligo",
+      "question_zh": "匹配滤波搜索的虚警率是精确估计还是上界？",
+      "claim_zh": "论文将 203000 年一次作为虚警率上界，而非精确事件发生频率。",
+      "retrieval_query_en": "false alarm rate upper bound binary coalescence search",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 7 页说明超过所有背景事件，因此只能给虚警率上界；该值描述噪声虚警，不是宇宙并合率。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 7,
+          "anchors": [
+            "only an upper bound",
+            "203 000 years"
+          ]
+        }
+      ],
+      "review_basis": "Assistant review of PDF text and rendered relevant pages; transfer case, not used as a runtime query mapping.",
+      "cohort": "transfer"
+    },
+    {
+      "id": "Q29",
+      "paper": "ligo",
+      "question_zh": "表 I 中质量参数的不确定区间是 95% 吗？",
+      "claim_zh": "表 I 的质量参数误差表示 95% 可信区间。",
+      "retrieval_query_en": "Table I source parameters median credible intervals masses",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "表 I 的区间为 90% credible intervals，并同时考虑统计与波形模型系统误差；不是 95%。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 7,
+          "anchors": [
+            "median values with 90% credible intervals",
+            "systematic errors"
+          ]
+        }
+      ],
+      "review_basis": "Assistant review of PDF text and rendered relevant pages; transfer case, not used as a runtime query mapping.",
+      "cohort": "transfer"
+    },
+    {
+      "id": "Q30",
+      "paper": "ligo",
+      "question_zh": "表 I 中两个初始黑洞和最终黑洞质量的中位数各是多少？",
+      "claim_zh": "表 I 的源参考系质量中位数分别为 36、29 和 62 个太阳质量。",
+      "retrieval_query_en": "Table I primary secondary final black hole mass source frame",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "质量的中位数为 36、29、62 M⊙，表注明确是 source frame；向探测器参考系换算需要乘以 1+z，不能混用。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 7,
+          "anchors": [
+            "Primary black hole mass 36",
+            "Secondary black hole mass 29",
+            "Final black hole mass 62",
+            "source"
+          ]
+        }
+      ],
+      "review_basis": "Assistant review of PDF text and rendered relevant pages; transfer case, not used as a runtime query mapping.",
+      "cohort": "transfer"
+    },
+    {
+      "id": "Q31",
+      "paper": "ligo",
+      "question_zh": "一次观测是否证明广义相对论在所有条件下都成立？",
+      "claim_zh": "GW150914 已证明广义相对论在所有未来实验中都不可能被推翻。",
+      "retrieval_query_en": "general relativity consistency tests violations observations",
+      "expected_verdict": "insufficient",
+      "reference_answer_zh": "文中报告有限检验与广义相对论一致，没有发现偏离；这不能支持所有未来实验的普遍保证。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 8,
+          "anchors": [
+            "no evidence for violations",
+            "all three tests are consistent"
+          ]
+        }
+      ],
+      "review_basis": "Assistant review of PDF text and rendered relevant pages; transfer case, not used as a runtime query mapping.",
+      "cohort": "transfer"
+    },
+    {
+      "id": "Q32",
+      "paper": "ligo",
+      "question_zh": "两类搜索报告的显著性是否完全相同？",
+      "claim_zh": "二体并合搜索和通用瞬态搜索都报告完全相同的 5.1σ 显著性。",
+      "retrieval_query_en": "generic transient binary coalescence searches significance Fig 4",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "图 4 说明分别为大于 5.1σ 和 4.6σ，必须区分搜索管线及其背景定义。",
+      "evidence_kind": "figure_caption",
+      "gold": [
+        {
+          "page": 6,
+          "anchors": [
+            "greater than 5.1σ and 4.6σ",
+            "respectively"
+          ]
+        }
+      ],
+      "review_basis": "Assistant review of PDF text and rendered relevant pages; transfer case, not used as a runtime query mapping.",
+      "cohort": "transfer"
+    },
+    {
+      "id": "Q33",
+      "paper": "alphafold",
+      "question_zh": "AlphaFold 在 CASP14 上的骨架误差中位数与次优方法分别是多少？",
+      "claim_zh": "CASP14 骨架误差中位数为 0.96 Å，次优方法为 2.8 Å。",
+      "retrieval_query_en": "CASP14 median backbone accuracy confidence interval rmsd",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 2 页给出这两个中位数；指标是 95% 残基覆盖的 r.m.s.d.，不能改写为所有原子或所有蛋白的误差。",
+      "evidence_kind": "numeric",
+      "gold": [
+        {
+          "page": 2,
+          "anchors": [
+            "0.96",
+            "2.8",
+            "median backbone",
+            "95%"
+          ]
+        }
+      ],
+      "review_basis": "Assistant review of PDF text and rendered relevant pages; transfer case, not used as a runtime query mapping.",
+      "cohort": "transfer"
+    },
+    {
+      "id": "Q34",
+      "paper": "alphafold",
+      "question_zh": "图 1a 的 CASP14 评估样本量是多少？",
+      "claim_zh": "图 1a 使用 87 个蛋白质结构域，而不是 87 名患者。",
+      "retrieval_query_en": "Fig 1 CASP14 dataset protein domains entries",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "图注明确 n=87 protein domains，146 是参赛条目总数而非该样本量。",
+      "evidence_kind": "figure_caption",
+      "gold": [
+        {
+          "page": 2,
+          "anchors": [
+            "87 protein domains",
+            "146 entries"
+          ]
+        }
+      ],
+      "review_basis": "Assistant review of PDF text and rendered relevant pages; transfer case, not used as a runtime query mapping.",
+      "cohort": "transfer"
+    },
+    {
+      "id": "Q35",
+      "paper": "alphafold",
+      "question_zh": "pLDDT 的置信分数评估的是结构精度还是生物学功能？",
+      "claim_zh": "pLDDT 直接度量蛋白质生物学功能是否正确。",
+      "retrieval_query_en": "pLDDT confidence measure local distance accuracy prediction",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "第 2 页将其定义为预测局部距离差异测试，用于估计对应结构预测精度，不是功能正确性评分。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 2,
+          "anchors": [
+            "predicted local-distance difference test (pLDDT)",
+            "accuracy of the"
+          ]
+        }
+      ],
+      "review_basis": "Assistant review of PDF text and rendered relevant pages; transfer case, not used as a runtime query mapping.",
+      "cohort": "transfer"
+    },
+    {
+      "id": "Q36",
+      "paper": "alphafold",
+      "question_zh": "多序列比对深度较低时，模型精度是否保持不变？",
+      "claim_zh": "AlphaFold 的精度不受 MSA 深度影响。",
+      "retrieval_query_en": "MSA depth accuracy decreases sequences limitations",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "第 6 页说明中位比对深度低于约 30 条序列时精度显著下降，超过约 100 条后的收益变小。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 6,
+          "anchors": [
+            "accuracy decreases substantially",
+            "30",
+            "100"
+          ]
+        }
+      ],
+      "review_basis": "Assistant review of PDF text and rendered relevant pages; transfer case, not used as a runtime query mapping.",
+      "cohort": "transfer"
+    },
+    {
+      "id": "Q37",
+      "paper": "alphafold",
+      "question_zh": "图 2a 中新 PDB 数据的骨架误差中位数及样本量是多少？",
+      "claim_zh": "图 2a 报告 3144 条蛋白链，整体误差中位数为 1.46 Å。",
+      "retrieval_query_en": "Fig 2 full chains overall median protein chains template",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "图 2a 是经过模板相似度等条件筛选的新 PDB 链，n=3144，中位数1.46 Å；不是 CASP14 的0.96 Å。",
+      "evidence_kind": "figure_caption",
+      "gold": [
+        {
+          "page": 3,
+          "anchors": [
+            "3,144 protein chains",
+            "overall median is 1.46"
+          ]
+        }
+      ],
+      "review_basis": "Assistant review of PDF text and rendered relevant pages; transfer case, not used as a runtime query mapping.",
+      "cohort": "transfer"
+    },
+    {
+      "id": "Q38",
+      "paper": "alphafold",
+      "question_zh": "论文是否报告随机临床试验证明患者生存获益？",
+      "claim_zh": "该论文通过随机临床试验证明使用 AlphaFold 可以提高患者生存率。",
+      "retrieval_query_en": "randomized clinical trial patient survival outcomes",
+      "expected_verdict": "insufficient",
+      "reference_answer_zh": "提供的论文研究结构预测及相关生物学应用，没有支持患者生存获益的随机临床试验证据。",
+      "evidence_kind": "prose",
+      "gold": [],
+      "review_basis": "Assistant review of PDF text and rendered relevant pages; transfer case, not used as a runtime query mapping.",
+      "cohort": "transfer"
+    }
+  ]
+}

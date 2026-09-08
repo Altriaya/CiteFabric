@@ -1,0 +1,94 @@
+{
+  "$defs": {
+    "PaperSelector": {
+      "additionalProperties": false,
+      "properties": {
+        "edition_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Edition Id"
+        },
+        "ref": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref"
+      ],
+      "title": "PaperSelector",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "allow_abstract": {
+      "default": false,
+      "title": "Allow Abstract",
+      "type": "boolean"
+    },
+    "expand_query": {
+      "default": true,
+      "title": "Expand Query",
+      "type": "boolean"
+    },
+    "include_context": {
+      "default": true,
+      "title": "Include Context",
+      "type": "boolean"
+    },
+    "max_chars": {
+      "default": 6000,
+      "maximum": 16000,
+      "minimum": 500,
+      "title": "Max Chars",
+      "type": "integer"
+    },
+    "max_passages": {
+      "default": 6,
+      "maximum": 12,
+      "minimum": 1,
+      "title": "Max Passages",
+      "type": "integer"
+    },
+    "papers": {
+      "items": {
+        "$ref": "#/$defs/PaperSelector"
+      },
+      "maxItems": 3,
+      "minItems": 1,
+      "title": "Papers",
+      "type": "array"
+    },
+    "query": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Query",
+      "type": "string"
+    },
+    "retrieval_policy": {
+      "default": "v2",
+      "enum": [
+        "v2",
+        "structured_v3"
+      ],
+      "title": "Retrieval Policy",
+      "type": "string"
+    }
+  },
+  "required": [
+    "papers",
+    "query"
+  ],
+  "title": "EvidenceRequest",
+  "type": "object"
+}

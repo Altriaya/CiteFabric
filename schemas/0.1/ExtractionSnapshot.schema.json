@@ -1,0 +1,169 @@
+{
+  "$defs": {
+    "Coverage": {
+      "additionalProperties": false,
+      "properties": {
+        "pages_failed": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Pages Failed",
+          "type": "array"
+        },
+        "pages_parsed": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pages Parsed"
+        },
+        "pages_total": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pages Total"
+        },
+        "sections_searched": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Sections Searched",
+          "type": "array"
+        },
+        "source_kind": {
+          "enum": [
+            "full_text",
+            "abstract",
+            "user_text"
+          ],
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "truncated": {
+          "default": false,
+          "title": "Truncated",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "source_kind"
+      ],
+      "title": "Coverage",
+      "type": "object"
+    },
+    "TextUnit": {
+      "additionalProperties": false,
+      "properties": {
+        "page": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "text_unit_id": {
+          "title": "Text Unit Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text_unit_id",
+        "text"
+      ],
+      "title": "TextUnit",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "config_hash": {
+      "title": "Config Hash",
+      "type": "string"
+    },
+    "coverage": {
+      "$ref": "#/$defs/Coverage"
+    },
+    "document_id": {
+      "title": "Document Id",
+      "type": "string"
+    },
+    "extraction_id": {
+      "title": "Extraction Id",
+      "type": "string"
+    },
+    "normalization_version": {
+      "default": "identity-utf8-v1",
+      "title": "Normalization Version",
+      "type": "string"
+    },
+    "parser": {
+      "title": "Parser",
+      "type": "string"
+    },
+    "parser_version": {
+      "title": "Parser Version",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "0.1",
+      "default": "0.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "text_hash": {
+      "title": "Text Hash",
+      "type": "string"
+    },
+    "text_snapshot": {
+      "title": "Text Snapshot",
+      "type": "string"
+    },
+    "text_units": {
+      "items": {
+        "$ref": "#/$defs/TextUnit"
+      },
+      "title": "Text Units",
+      "type": "array"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "document_id",
+    "parser",
+    "parser_version",
+    "config_hash",
+    "text_snapshot",
+    "text_units",
+    "text_hash",
+    "coverage"
+  ],
+  "title": "ExtractionSnapshot",
+  "type": "object"
+}

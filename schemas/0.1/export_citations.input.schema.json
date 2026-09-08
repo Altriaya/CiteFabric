@@ -1,0 +1,76 @@
+{
+  "$defs": {
+    "PaperSelector": {
+      "additionalProperties": false,
+      "properties": {
+        "edition_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Edition Id"
+        },
+        "ref": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref"
+      ],
+      "title": "PaperSelector",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "default": "bibtex",
+      "enum": [
+        "bibtex",
+        "csl_json",
+        "apa",
+        "ieee"
+      ],
+      "title": "Format",
+      "type": "string"
+    },
+    "papers": {
+      "items": {
+        "$ref": "#/$defs/PaperSelector"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "title": "Papers",
+      "type": "array"
+    },
+    "receipt_ids": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Receipt Ids"
+    }
+  },
+  "required": [
+    "papers"
+  ],
+  "title": "ExportRequest",
+  "type": "object"
+}

@@ -1,0 +1,194 @@
+{
+  "$defs": {
+    "Author": {
+      "additionalProperties": false,
+      "properties": {
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "family": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Family"
+        },
+        "given": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Given"
+        },
+        "orcid": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Orcid"
+        },
+        "organization": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Organization"
+        }
+      },
+      "required": [
+        "display_name"
+      ],
+      "title": "Author",
+      "type": "object"
+    },
+    "Issued": {
+      "additionalProperties": false,
+      "properties": {
+        "day": {
+          "anyOf": [
+            {
+              "maximum": 31,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Day"
+        },
+        "month": {
+          "anyOf": [
+            {
+              "maximum": 12,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Month"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "maximum": 9999,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year"
+        }
+      },
+      "title": "Issued",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "authors": {
+      "items": {
+        "$ref": "#/$defs/Author"
+      },
+      "title": "Authors",
+      "type": "array"
+    },
+    "conflicts": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Conflicts",
+      "type": "array"
+    },
+    "created_at": {
+      "title": "Created At",
+      "type": "string"
+    },
+    "edition_id": {
+      "title": "Edition Id",
+      "type": "string"
+    },
+    "field_provenance": {
+      "additionalProperties": {
+        "items": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "title": "Field Provenance",
+      "type": "object"
+    },
+    "issued": {
+      "$ref": "#/$defs/Issued"
+    },
+    "schema_version": {
+      "const": "0.1",
+      "default": "0.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "selection_policy_version": {
+      "default": "source-priority-v1",
+      "title": "Selection Policy Version",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "venue": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Venue"
+    }
+  },
+  "required": [
+    "edition_id",
+    "title",
+    "authors",
+    "issued"
+  ],
+  "title": "MetadataSnapshot",
+  "type": "object"
+}

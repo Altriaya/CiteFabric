@@ -1,0 +1,116 @@
+{
+  "$defs": {
+    "ExternalID": {
+      "additionalProperties": false,
+      "properties": {
+        "namespace": {
+          "enum": [
+            "doi",
+            "arxiv",
+            "openalex",
+            "s2",
+            "pmid"
+          ],
+          "title": "Namespace",
+          "type": "string"
+        },
+        "source_record_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Record Ids",
+          "type": "array"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Version"
+        }
+      },
+      "required": [
+        "namespace",
+        "value"
+      ],
+      "title": "ExternalID",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "edition_id": {
+      "title": "Edition Id",
+      "type": "string"
+    },
+    "external_ids": {
+      "items": {
+        "$ref": "#/$defs/ExternalID"
+      },
+      "title": "External Ids",
+      "type": "array"
+    },
+    "fabric_id": {
+      "title": "Fabric Id",
+      "type": "string"
+    },
+    "identity_status": {
+      "default": "unresolved",
+      "enum": [
+        "verified",
+        "unresolved",
+        "conflict",
+        "user_asserted"
+      ],
+      "title": "Identity Status",
+      "type": "string"
+    },
+    "kind": {
+      "default": "unknown",
+      "title": "Kind",
+      "type": "string"
+    },
+    "metadata_snapshot_id": {
+      "title": "Metadata Snapshot Id",
+      "type": "string"
+    },
+    "publication_status": {
+      "additionalProperties": true,
+      "title": "Publication Status",
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "0.1",
+      "default": "0.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Version"
+    }
+  },
+  "required": [
+    "fabric_id",
+    "metadata_snapshot_id"
+  ],
+  "title": "Edition",
+  "type": "object"
+}

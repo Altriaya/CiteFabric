@@ -1,0 +1,236 @@
+{
+  "$defs": {
+    "Claim": {
+      "additionalProperties": false,
+      "properties": {
+        "claim_id": {
+          "title": "Claim Id",
+          "type": "string"
+        },
+        "context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "language": {
+          "default": "und",
+          "title": "Language",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "0.1",
+          "default": "0.1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "Claim",
+      "type": "object"
+    },
+    "ClaimAssessment": {
+      "additionalProperties": false,
+      "properties": {
+        "assessment_id": {
+          "title": "Assessment Id",
+          "type": "string"
+        },
+        "claim_id": {
+          "title": "Claim Id",
+          "type": "string"
+        },
+        "coverage": {
+          "additionalProperties": true,
+          "title": "Coverage",
+          "type": "object"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "edition_id": {
+          "title": "Edition Id",
+          "type": "string"
+        },
+        "evidence_relations": {
+          "items": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "title": "Evidence Relations",
+          "type": "array"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        },
+        "reason_code": {
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "0.1",
+          "default": "0.1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "subclaims": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Subclaims",
+          "type": "array"
+        },
+        "usage": {
+          "additionalProperties": true,
+          "title": "Usage",
+          "type": "object"
+        },
+        "verdict": {
+          "enum": [
+            "supported",
+            "partially_supported",
+            "contradicted",
+            "insufficient_evidence",
+            "unavailable"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        },
+        "verifier": {
+          "additionalProperties": true,
+          "title": "Verifier",
+          "type": "object"
+        }
+      },
+      "required": [
+        "claim_id",
+        "edition_id",
+        "verdict",
+        "reason_code",
+        "rationale",
+        "limitations",
+        "coverage",
+        "verifier"
+      ],
+      "title": "ClaimAssessment",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "assessment": {
+      "$ref": "#/$defs/ClaimAssessment"
+    },
+    "claim_snapshot": {
+      "$ref": "#/$defs/Claim"
+    },
+    "created_at": {
+      "title": "Created At",
+      "type": "string"
+    },
+    "document_hashes": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Document Hashes",
+      "type": "object"
+    },
+    "evidence_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence Ids",
+      "type": "array"
+    },
+    "grounding_status": {
+      "enum": [
+        "verified",
+        "failed",
+        "not_checked"
+      ],
+      "title": "Grounding Status",
+      "type": "string"
+    },
+    "identity_assessments": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Identity Assessments",
+      "type": "array"
+    },
+    "metadata_snapshot_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Metadata Snapshot Ids",
+      "type": "array"
+    },
+    "receipt_id": {
+      "title": "Receipt Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "0.1",
+      "default": "0.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "supersedes_receipt_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Supersedes Receipt Id"
+    },
+    "verification_config_hash": {
+      "title": "Verification Config Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "claim_snapshot",
+    "metadata_snapshot_ids",
+    "assessment",
+    "evidence_ids",
+    "document_hashes",
+    "identity_assessments",
+    "grounding_status",
+    "verification_config_hash"
+  ],
+  "title": "EvidenceReceipt",
+  "type": "object"
+}

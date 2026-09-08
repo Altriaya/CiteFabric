@@ -1,0 +1,124 @@
+{
+  "$defs": {
+    "Filters": {
+      "additionalProperties": false,
+      "properties": {
+        "open_access": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Open Access"
+        },
+        "year_from": {
+          "anyOf": [
+            {
+              "maximum": 9999,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year From"
+        },
+        "year_to": {
+          "anyOf": [
+            {
+              "maximum": 9999,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Year To"
+        }
+      },
+      "title": "Filters",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "cursor": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cursor"
+    },
+    "evidence_ready": {
+      "default": false,
+      "title": "Evidence Ready",
+      "type": "boolean"
+    },
+    "filters": {
+      "$ref": "#/$defs/Filters"
+    },
+    "limit": {
+      "default": 10,
+      "maximum": 20,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    },
+    "query": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Query",
+      "type": "string"
+    },
+    "sort": {
+      "default": "relevance",
+      "enum": [
+        "relevance",
+        "recent"
+      ],
+      "title": "Sort",
+      "type": "string"
+    },
+    "sources": {
+      "anyOf": [
+        {
+          "items": {
+            "enum": [
+              "crossref",
+              "arxiv",
+              "openalex",
+              "semantic_scholar"
+            ],
+            "type": "string"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sources"
+    }
+  },
+  "required": [
+    "query"
+  ],
+  "title": "SearchRequest",
+  "type": "object"
+}

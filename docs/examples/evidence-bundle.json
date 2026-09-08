@@ -1,0 +1,251 @@
+{
+  "schema_version": "0.1",
+  "example_only": true,
+  "description": "Synthetic design fixture. Portable bundle example, not a tool Result envelope or an implementation output.",
+  "source_file": "source.txt",
+  "paper": {
+    "schema_version": "0.1",
+    "fabric_id": "fabric:00000000-0000-0000-0000-000000000001",
+    "created_at": "2026-09-07T08:00:00Z",
+    "edition_ids": [
+      "00000000-0000-0000-0000-000000000002"
+    ],
+    "preferred_edition_id": "00000000-0000-0000-0000-000000000002",
+    "relations": [],
+    "identity_status": "user_asserted"
+  },
+  "edition": {
+    "schema_version": "0.1",
+    "edition_id": "00000000-0000-0000-0000-000000000002",
+    "fabric_id": "fabric:00000000-0000-0000-0000-000000000001",
+    "kind": "other",
+    "version": "fixture-v1",
+    "external_ids": [],
+    "metadata_snapshot_id": "00000000-0000-0000-0000-000000000009",
+    "publication_status": {
+      "status": "unknown",
+      "source": "synthetic_fixture",
+      "observed_at": "2026-09-07T08:00:00Z"
+    }
+  },
+  "metadata_snapshot": {
+    "schema_version": "0.1",
+    "snapshot_id": "00000000-0000-0000-0000-000000000009",
+    "edition_id": "00000000-0000-0000-0000-000000000002",
+    "title": "Synthetic memory benchmark fixture",
+    "authors": [],
+    "issued": {
+      "year": null,
+      "month": null,
+      "day": null
+    },
+    "venue": null,
+    "field_provenance": {
+      "title": [
+        {
+          "value": "Synthetic memory benchmark fixture",
+          "provider": "user",
+          "source_record_id": null,
+          "retrieved_at": "2026-09-07T08:00:00Z",
+          "snapshot_id": "00000000-0000-0000-0000-000000000009"
+        }
+      ]
+    },
+    "conflicts": [],
+    "selection_policy_version": "fixture-v1",
+    "created_at": "2026-09-07T08:00:00Z"
+  },
+  "document": {
+    "schema_version": "0.1",
+    "document_id": "00000000-0000-0000-0000-000000000003",
+    "edition_id": "00000000-0000-0000-0000-000000000002",
+    "media_type": "text/plain",
+    "byte_length": 211,
+    "source_hash": "sha256:ff319c2204783a1f289890f9c4de898e922c6f48878bd26c1be8554d66a8b663",
+    "version_label": "fixture-v1",
+    "binding": {
+      "status": "user_asserted",
+      "method": "synthetic_fixture_import",
+      "matched_identifiers": [],
+      "metadata_snapshot_id": "00000000-0000-0000-0000-000000000009",
+      "checked_at": "2026-09-07T08:00:00Z",
+      "warnings": [
+        "Not externally verified."
+      ]
+    },
+    "access": {
+      "access_type": "local_user_file",
+      "license": null,
+      "redistribution": "unknown",
+      "basis": "synthetic_fixture"
+    },
+    "retrieval_event_ids": [
+      "00000000-0000-0000-0000-000000000005"
+    ]
+  },
+  "retrieval_event": {
+    "schema_version": "0.1",
+    "event_id": "00000000-0000-0000-0000-000000000005",
+    "document_id": "00000000-0000-0000-0000-000000000003",
+    "provider": "local_import",
+    "source_uri": "citefabric://documents/00000000-0000-0000-0000-000000000003",
+    "retrieved_at": "2026-09-07T08:00:00Z",
+    "http_status": null,
+    "etag": null,
+    "license": null
+  },
+  "extraction_snapshot": {
+    "schema_version": "0.1",
+    "extraction_id": "00000000-0000-0000-0000-000000000004",
+    "document_id": "00000000-0000-0000-0000-000000000003",
+    "parser": "plain_text_fixture",
+    "parser_version": "design-only",
+    "config_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "normalization_version": "identity-utf8-v1",
+    "text_hash": "sha256:ff319c2204783a1f289890f9c4de898e922c6f48878bd26c1be8554d66a8b663",
+    "coverage": {
+      "source_kind": "user_text",
+      "pages_total": null,
+      "pages_parsed": null,
+      "pages_failed": [],
+      "sections_searched": [
+        "unit:1"
+      ],
+      "truncated": false
+    },
+    "warnings": [
+      "Synthetic fixture."
+    ],
+    "text_units": [
+      {
+        "text_unit_id": "unit:1",
+        "page": null,
+        "text": "Synthetic fixture — not scientific evidence.\n\nIn the synthetic Task-A benchmark, the memory-enabled agent completed 62 of 100 tasks; the baseline completed 50 of 100 tasks. No other benchmarks were evaluated.\n"
+      }
+    ],
+    "text_snapshot": "Synthetic fixture — not scientific evidence.\n\nIn the synthetic Task-A benchmark, the memory-enabled agent completed 62 of 100 tasks; the baseline completed 50 of 100 tasks. No other benchmarks were evaluated.\n"
+  },
+  "evidence": [
+    {
+      "schema_version": "0.1",
+      "evidence_id": "00000000-0000-0000-0000-000000000006",
+      "fabric_id": "fabric:00000000-0000-0000-0000-000000000001",
+      "edition_id": "00000000-0000-0000-0000-000000000002",
+      "document_id": "00000000-0000-0000-0000-000000000003",
+      "extraction_id": "00000000-0000-0000-0000-000000000004",
+      "retrieval_event_id": "00000000-0000-0000-0000-000000000005",
+      "source_hash": "sha256:ff319c2204783a1f289890f9c4de898e922c6f48878bd26c1be8554d66a8b663",
+      "text_hash": "sha256:ff319c2204783a1f289890f9c4de898e922c6f48878bd26c1be8554d66a8b663",
+      "locator": {
+        "kind": "plain_text",
+        "page": null,
+        "page_label": null,
+        "section": null,
+        "text_unit_id": "unit:1",
+        "char_start": 46,
+        "char_end": 208,
+        "bbox": null,
+        "table_id": null,
+        "cell": null
+      },
+      "excerpt": "In the synthetic Task-A benchmark, the memory-enabled agent completed 62 of 100 tasks; the baseline completed 50 of 100 tasks. No other benchmarks were evaluated.",
+      "excerpt_hash": "sha256:bed43b7459fc67ad6c0588927f2fbbde18bde7b2756091fba86e76ff991bdf39",
+      "source_kind": "user_text",
+      "grounding": {
+        "status": "verified",
+        "method": "snapshot_slice_and_hash",
+        "checked_at": "2026-09-07T08:00:00Z",
+        "limitations": [
+          "Text integrity only; no document identity or semantic support verification."
+        ]
+      },
+      "context_refs": []
+    }
+  ],
+  "claim": {
+    "schema_version": "0.1",
+    "claim_id": "00000000-0000-0000-0000-000000000007",
+    "text": "Persistent memory improves agent performance across benchmarks.",
+    "context": "Synthetic example only; semantic verification was not run.",
+    "language": "en",
+    "created_at": "2026-09-07T08:00:00Z"
+  },
+  "receipt": {
+    "schema_version": "0.1",
+    "receipt_id": "00000000-0000-0000-0000-000000000008",
+    "claim_snapshot": {
+      "schema_version": "0.1",
+      "claim_id": "00000000-0000-0000-0000-000000000007",
+      "text": "Persistent memory improves agent performance across benchmarks.",
+      "context": "Synthetic example only; semantic verification was not run.",
+      "language": "en",
+      "created_at": "2026-09-07T08:00:00Z"
+    },
+    "metadata_snapshot_ids": [
+      "00000000-0000-0000-0000-000000000009"
+    ],
+    "assessment": {
+      "schema_version": "0.1",
+      "assessment_id": "00000000-0000-0000-0000-00000000000a",
+      "claim_id": "00000000-0000-0000-0000-000000000007",
+      "edition_id": "00000000-0000-0000-0000-000000000002",
+      "verdict": "unavailable",
+      "reason_code": "verifier_not_configured",
+      "subclaims": [],
+      "evidence_relations": [
+        {
+          "evidence_id": "00000000-0000-0000-0000-000000000006",
+          "relation": "context"
+        }
+      ],
+      "rationale": "The excerpt is traceable to a local synthetic text snapshot. No semantic verifier was run.",
+      "limitations": [
+        "Synthetic text is not scientific evidence.",
+        "Document identity is user asserted, not externally verified."
+      ],
+      "coverage": {
+        "scope": "supplied_evidence_only",
+        "documents": [
+          "00000000-0000-0000-0000-000000000003"
+        ],
+        "evidence_ids": [
+          "00000000-0000-0000-0000-000000000006"
+        ]
+      },
+      "verifier": {
+        "backend": "none",
+        "model": null,
+        "model_revision": null,
+        "prompt_hash": null,
+        "policy_version": "abstain-without-backend-v1"
+      },
+      "usage": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cost": null,
+        "currency": null
+      },
+      "created_at": "2026-09-07T08:00:00Z"
+    },
+    "evidence_ids": [
+      "00000000-0000-0000-0000-000000000006"
+    ],
+    "document_hashes": {
+      "00000000-0000-0000-0000-000000000003": "sha256:ff319c2204783a1f289890f9c4de898e922c6f48878bd26c1be8554d66a8b663"
+    },
+    "identity_assessments": [
+      {
+        "status": "user_asserted",
+        "scope": "00000000-0000-0000-0000-000000000002",
+        "source_record_ids": [],
+        "method": "synthetic_fixture",
+        "checked_at": "2026-09-07T08:00:00Z",
+        "conflicts": []
+      }
+    ],
+    "grounding_status": "verified",
+    "verification_config_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "created_at": "2026-09-07T08:00:00Z",
+    "supersedes_receipt_id": null
+  }
+}

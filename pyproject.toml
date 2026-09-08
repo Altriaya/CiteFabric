@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "citefabric"
+version = "0.1.0"
+description = "Version-aware academic search and traceable evidence for research agents"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+dependencies = [
+  "pydantic>=2.11,<3",
+  "httpx>=0.28,<0.29",
+  "mcp>=1.26,<2",
+  "pypdf>=6.0,<7",
+  "typer>=0.16,<1",
+  "platformdirs>=4,<5",
+  "defusedxml>=0.7,<1",
+]
+
+[project.scripts]
+citefabric = "citefabric.cli:app"
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "pytest-asyncio>=1,<2", "ruff>=0.12,<1", "jsonschema>=4,<5", "mypy>=1.15,<2"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+check_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/citefabric"]

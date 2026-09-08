@@ -1,0 +1,3 @@
+Synthetic fixture — not scientific evidence.
+
+In the synthetic Task-A benchmark, the memory-enabled agent completed 62 of 100 tasks; the baseline completed 50 of 100 tasks. No other benchmarks were evaluated.

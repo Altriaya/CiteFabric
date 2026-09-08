@@ -1,0 +1,469 @@
+{
+  "schema_version": 1,
+  "annotation_date": "2026-09-08",
+  "annotation_method": "Assistant review of supplied PDFs; labels prepared before retrieval, not a blinded benchmark.",
+  "page_numbering": "1-based physical PDF pages",
+  "papers": [
+    {
+      "key": "backtime",
+      "filename": "Lin 等 - 2024 - BACKTIME Backdoor Attacks on Multivariate Time Series Forecasting.pdf",
+      "sha256": "f01d41cb571e90a898efc3205e711ece7173239de795417ce66333bdd641c0af",
+      "pages": 17,
+      "title": "BACKTIME: Backdoor Attacks on Multivariate Time Series Forecasting",
+      "year": 2024,
+      "arxiv": "2410.02195",
+      "version": "v1",
+      "authors": [
+        "Xiao Lin",
+        "Zhining Liu",
+        "Dongqi Fu",
+        "Ruizhong Qiu",
+        "Hanghang Tong"
+      ],
+      "metadata_basis": "Transcribed from the supplied PDF first page; not independently verified by an online registry."
+    },
+    {
+      "key": "tdba",
+      "filename": "Liu 等 - 2026 - Beyond Immediate Activation Temporally Decoupled Backdoor Attacks on Time Series Forecasting.pdf",
+      "sha256": "e1eb66ca653b6b9724cef93835049e06094421cb7aec24adefc7a87c689ff3f6",
+      "pages": 9,
+      "title": "Beyond Immediate Activation: Temporally Decoupled Backdoor Attacks on Time Series Forecasting",
+      "year": 2026,
+      "arxiv": "2601.04247",
+      "version": "v1",
+      "authors": [
+        "Zhixin Liu",
+        "Xuanlin Liu",
+        "Sihan Xu",
+        "Yaqiong Qiao",
+        "Ying Zhang",
+        "Xiangrui Cai"
+      ],
+      "metadata_basis": "Transcribed from the supplied PDF first page; not independently verified by an online registry."
+    },
+    {
+      "key": "timeguard",
+      "filename": "Nguyen 等 - 2026 - TimeGuard Channel-wise Pool Training for Backdoor Defense in Time Series Forecasting.pdf",
+      "sha256": "d38f4a9260796a494f79de761bb3e2a8d327a2baeaffe8501b4a66074f8f0cec",
+      "pages": 44,
+      "title": "TimeGuard: Channel-wise Pool Training for Backdoor Defense in Time Series Forecasting",
+      "year": 2026,
+      "arxiv": "2605.22365",
+      "version": "v2",
+      "authors": [
+        "Quang Duc Nguyen",
+        "Siyuan Liang",
+        "Yiming Li",
+        "Fushuo Huo",
+        "Dacheng Tao"
+      ],
+      "metadata_basis": "Transcribed from the supplied PDF first page; not independently verified by an online registry."
+    }
+  ],
+  "cases": [
+    {
+      "id": "Q01",
+      "paper": "backtime",
+      "question_zh": "BACKTIME 用什么框架建模变量关系和生成触发器？",
+      "claim_zh": "BACKTIME 使用双层优化框架及基于变量关系的 GNN 触发器生成器。",
+      "retrieval_query_en": "bi-level optimization GNN inter-variable correlations",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 2 页贡献部分明确说明双层优化及 GNN 生成器；这一论断仅描述论文方法。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 2,
+          "anchors": [
+            "bi-level optimization framework",
+            "inter-variable",
+            "GNN-based trigger generator"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation."
+    },
+    {
+      "id": "Q02",
+      "paper": "backtime",
+      "question_zh": "BACKTIME 使用哪五个数据集，如何划分？",
+      "claim_zh": "实验使用 PEMS03、PEMS04、PEMS08、Weather、ETTm1，训练/验证/测试比例为 60%/20%/20%。",
+      "retrieval_query_en": "Datasets weather ETTm1 splits train validation test",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 8 页实验设置列出这五个数据集及 60%/20%/20% 划分。注意是 ETTm1。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 8,
+          "anchors": [
+            "PEMS03",
+            "PEMS04",
+            "PEMS08",
+            "ETTm1",
+            "60%/20%/20%"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation."
+    },
+    {
+      "id": "Q03",
+      "paper": "backtime",
+      "question_zh": "攻击指标 MAE_A 应该越大越好吗？",
+      "claim_zh": "BACKTIME 的 MAE_A 越大，攻击越成功。",
+      "retrieval_query_en": "Metrics attack effectiveness Mean Absolute Error target pattern lower better",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "MAE_A 衡量预测与目标模式之间的误差，越低表示越贴近攻击目标；第 8 页明确说明所有所列误差指标越低越好。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 8,
+          "anchors": [
+            "Metrics.",
+            "the lower, the better"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation."
+    },
+    {
+      "id": "Q04",
+      "paper": "backtime",
+      "question_zh": "表 2 中 PEMS03 的平均 MAE_A 是多少？",
+      "claim_zh": "在表 2 的 PEMS03 Average 行，Clean 的 MAE_A 为 35.62，BACKTIME 为 17.52。",
+      "retrieval_query_en": "PEMS03 Average Clean BACKTIME main results",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "表 2 的两个数值分别为 35.62 和 17.52，约下降 50.81%。Clean 列的攻击指标使用干净输入，不能当成同输入条件下的比较。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 8,
+          "anchors": [
+            "Average 17.27 35.62",
+            "18.23 17.52"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "scope_note_zh": "需要同时核对表头、Average 行，以及正文对 Clean 输入条件的说明。"
+    },
+    {
+      "id": "Q05",
+      "paper": "backtime",
+      "question_zh": "BACKTIME 是否在所有数据集上都改善干净预测？",
+      "claim_zh": "相较 Clean，BACKTIME 在表 2 的每个数据集上都降低了平均 MAE_C。",
+      "retrieval_query_en": "clean natural forecasting ability PEMS03 Average",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "PEMS03 平均 MAE_C 从 Clean 的 17.27 上升到 BACKTIME 的 18.23，已经构成反例；不能把“有竞争力”改写为“处处改善”。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 8,
+          "anchors": [
+            "Average 17.27 35.62",
+            "18.23 17.52"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation."
+    },
+    {
+      "id": "Q06",
+      "paper": "backtime",
+      "question_zh": "异常检测表中的 AUC 是否全都恰好等于随机猜测？",
+      "claim_zh": "表 4 中所有检测器在所有数据集上的 AUC 都严格等于 0.5。",
+      "retrieval_query_en": "GDN USAD Weather F1-score AUC anomaly detection",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "表 4 的数值并不都等于 0.5，例如 Weather 上 GDN 的 AUC 为 0.6450。“接近随机猜测”不能等同于数值严格相等，也不能推出所有检测器均不可检测。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 9,
+          "anchors": [
+            "GDN",
+            "0.6450"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation."
+    },
+    {
+      "id": "Q07",
+      "paper": "backtime",
+      "question_zh": "文中是否报告了医院部署后患者结局改善？",
+      "claim_zh": "BACKTIME 已在医院前瞻性部署中证明改善患者结局。",
+      "retrieval_query_en": "hospital prospective deployment patient outcomes epidemiology",
+      "expected_verdict": "insufficient",
+      "reference_answer_zh": "未找到医院前瞻性部署或患者结局的直接实验证据。摘要/引言列举流行病学应用领域，不能支持这一临床部署论断。",
+      "evidence_kind": "prose",
+      "gold": [],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "scope_note_zh": "无正向证据锚点；未检索到不等于证明现实世界从未发生过。核查范围仅为用户提供的这一版本。"
+    },
+    {
+      "id": "Q08",
+      "paper": "tdba",
+      "question_zh": "TDBA 能否让不同变量在不同延迟位置激活目标模式？",
+      "claim_zh": "TDBA 支持变量特定的延迟与异步激活，并使用位置引导生成和位置感知优化两个模块。",
+      "retrieval_query_en": "delayed asynchronous position-guided generation position-aware optimization modules",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 2 页明确说明两个模块及跨变量延迟、异步激活的目标。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 2,
+          "anchors": [
+            "delayed and asynchronous",
+            "position-guided trigger generation",
+            "position-aware optimization"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation."
+    },
+    {
+      "id": "Q09",
+      "paper": "tdba",
+      "question_zh": "TDBA 的电力变压器数据集是哪一个？",
+      "claim_zh": "TDBA 与 BACKTIME 一样使用 ETTm1 作为文中列出的变压器数据集。",
+      "retrieval_query_en": "Datasets Weather PEMS ETTh1 ETTm1",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "TDBA 第 5 页和表 1 写的是 ETTh1；BACKTIME 第 8 页写的是 ETTm1，不能混为同一数据集。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 5,
+          "anchors": [
+            "ETTh1",
+            "Datasets."
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation."
+    },
+    {
+      "id": "Q10",
+      "paper": "tdba",
+      "question_zh": "Weather 上 TDBA-Inv 与 BACKTIME 的平均攻击误差分别是多少？",
+      "claim_zh": "表 1 中 Weather 的平均 M_p^a 从 BACKTIME 的 23.22 降至 TDBA-Inv 的 3.48。",
+      "retrieval_query_en": "Weather Average BackTime TDBA-Inv performance",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 6 页表 1 对应值为 23.22 和 3.48，下降约 85.01%；限定为 Weather、cone 目标模式和表中模型均值。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 6,
+          "anchors": [
+            "23.22",
+            "3.48"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation."
+    },
+    {
+      "id": "Q11",
+      "paper": "tdba",
+      "question_zh": "TDBA-Gcn 是否在五个数据集的平均攻击误差上全部优于 BACKTIME？",
+      "claim_zh": "TDBA-Gcn 在表 1 的每个数据集上平均 M_p^a 都低于 BACKTIME。",
+      "retrieval_query_en": "ETTh1 Average BackTime TDBA-Gcn performance",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "ETTh1 行中 TDBA-Gcn 的平均 M_p^a 为 2.90，而 BACKTIME 为 2.74；越低越好的指标在此没有改善。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 6,
+          "anchors": [
+            "ETTh1 Average",
+            "2.74",
+            "2.90"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation."
+    },
+    {
+      "id": "Q12",
+      "paper": "tdba",
+      "question_zh": "论文是否已经实现同一次训练学习多个目标模式？",
+      "claim_zh": "TDBA 已解决多目标模式联合训练和跨领域迁移问题。",
+      "retrieval_query_en": "limitations single target pattern training cross-domain transferability future",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "第 7 页结论将单目标模式训练、有限跨领域迁移列为当前限制，并把多目标模式学习列为未来工作。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 7,
+          "anchors": [
+            "single target pattern training",
+            "limited cross-domain",
+            "Future work will explore"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation."
+    },
+    {
+      "id": "Q13",
+      "paper": "tdba",
+      "question_zh": "PEMS04 上 TDBA-GCN 的 USAD 检测结果是多少？",
+      "claim_zh": "表 4 报告 TDBA-GCN 在 PEMS04 上的 USAD AUC-ROC 为 0.4961。",
+      "retrieval_query_en": "USAD anomaly detection PEMS04 TDBA-GCN AUC",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 7 页表 4 为 0.4961；限于该检测器、数据集和实验协议，不能推广为所有检测器均无效。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 7,
+          "anchors": [
+            "TDBA-GCN 0.5313 0.4961"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation."
+    },
+    {
+      "id": "Q14",
+      "paper": "timeguard",
+      "question_zh": "TimeGuard 评估了多少种已有防御，发现哪两个问题？",
+      "claim_zh": "TimeGuard 评估了 13 种代表性防御，并指出通道级信号稀释与训练损失退化。",
+      "retrieval_query_en": "thirteen defenses channel signal dilution training loss degeneration",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 1 页摘要说明 13 种防御及两个问题；第 4 页进一步分为 10 种训练阶段和 3 种推理阶段防御。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 1,
+          "anchors": [
+            "thirteen representative backdoor de-",
+            "signal dilution",
+            "training-loss degeneration"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation."
+    },
+    {
+      "id": "Q15",
+      "paper": "timeguard",
+      "question_zh": "初始可靠池如何合并 RCF 与 NDF 的选择结果？",
+      "claim_zh": "TimeGuard 将 RCF 与 NDF 选出的样本取并集，构建初始可靠池。",
+      "retrieval_query_en": "initial reliable pool RCF NDF intersecting selections",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "第 6 页图 4 和正文说明取交集，不是并集；两项筛选都通过才进入初始可靠池。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 6,
+          "anchors": [
+            "intersecting samples",
+            "Reverse-",
+            "Neighborhood Diversity Filtering"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation."
+    },
+    {
+      "id": "Q16",
+      "paper": "timeguard",
+      "question_zh": "只看到 MAE_P 增大能否判定防御更好？",
+      "claim_zh": "TimeGuard 要求维持较低 MAE_C，同时提高 MAE_P；FDER 用于惩罚干净性能退化造成的虚假收益。",
+      "retrieval_query_en": "Evaluation metrics false wins FDER clean performance degradation",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 4 页定义指出，模型整体退化也可能推高 MAE_P，因此需要同时查看干净性能，并使用 FDER 衡量折中。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 4,
+          "anchors": [
+            "false",
+            "overall forecasting quality degrades",
+            "penalizing clean-performance degradation"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation."
+    },
+    {
+      "id": "Q17",
+      "paper": "timeguard",
+      "question_zh": "PEMS03/BackTime 条件下 TimeGuard 带来多大误差变化？",
+      "claim_zh": "表 3 中 MAE_P 从 14.201 提升至 39.303，同时 MAE_C 从 17.607 变为 18.048。",
+      "retrieval_query_en": "PEMS03 BackTime No Defense TIMEGUARD main results",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 7 页表 3 显示 MAE_P 为原来的约 2.768 倍，MAE_C 上升约 2.505%。这是三种模型均值，不能改成每个模型都满足同样幅度。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 7,
+          "anchors": [
+            "17.607 14.201",
+            "18.048 39.303"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation."
+    },
+    {
+      "id": "Q18",
+      "paper": "timeguard",
+      "question_zh": "TimeGuard 初始化是否需要额外可信干净参考集？",
+      "claim_zh": "TimeGuard 的 Stage I 无需任何额外干净参考集即可初始化可靠池。",
+      "retrieval_query_en": "Stage I initialize reliable pool without clean reference set",
+      "expected_verdict": "supported",
+      "reference_answer_zh": "第 6 页 4.2 节明确说明 without any clean reference set；这不代表完全不需要训练数据。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 6,
+          "anchors": [
+            "without any clean reference set"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation."
+    },
+    {
+      "id": "Q19",
+      "paper": "timeguard",
+      "question_zh": "没有推理开销是否意味着没有训练开销？",
+      "claim_zh": "TimeGuard 相比普通训练既没有额外推理开销，也没有额外训练开销。",
+      "retrieval_query_en": "Efficiency training time overhead inference Table 6",
+      "expected_verdict": "contradicted",
+      "reference_answer_zh": "第 9 页报告无额外推理开销，但平均训练时间为 3372 秒对 2134 秒，约 1.58 倍；总训练时间是原来的 158%，增加约 58%。",
+      "evidence_kind": "table",
+      "gold": [
+        {
+          "page": 9,
+          "anchors": [
+            "3372",
+            "2134",
+            "no inference-time overhead"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation."
+    },
+    {
+      "id": "Q20",
+      "paper": "timeguard",
+      "question_zh": "是否能从论文推出对任意未来自适应攻击的完美防御保证？",
+      "claim_zh": "TimeGuard 已证明对所有未来自适应攻击都能实现 100% 防御。",
+      "retrieval_query_en": "Limitations adaptive attacks distribution shifts precision recall trade-off",
+      "expected_verdict": "insufficient",
+      "reference_answer_zh": "没有这种普遍保证。第 44 页明确讨论手工邻域度量、分布漂移及触发模式接近常见动态时的精确率/召回率折中；第 9 页有限自适应实验不能证明所有未来攻击均可被阻断。",
+      "evidence_kind": "prose",
+      "gold": [
+        {
+          "page": 44,
+          "anchors": [
+            "precision–recall trade-off",
+            "distribution shifts"
+          ]
+        }
+      ],
+      "review_basis": "Assistant source review, not an automatic verifier judgment or independent expert annotation.",
+      "scope_note_zh": "这里的 insufficient 表示普遍量化结论未被证明；局部实验或有限假设下的理论不支持它。"
+    }
+  ]
+}
