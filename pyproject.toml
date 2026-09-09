@@ -22,6 +22,11 @@ dependencies = [
 [project.scripts]
 citefabric = "citefabric.cli:app"
 
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+default = true
+
 [dependency-groups]
 dev = ["pytest>=8,<10", "pytest-asyncio>=1,<2", "ruff>=0.12,<1", "jsonschema>=4,<5", "mypy>=1.15,<2"]
 

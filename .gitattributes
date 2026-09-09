@@ -1,0 +1,4 @@
+# Evidence hashes and character offsets are defined over LF source text.
+* text=auto eol=lf
+*.pdf binary
+*.sqlite3 binary

@@ -91,7 +91,7 @@ async def test_page_expansion_preserves_original_evidence_and_receipt(config, tm
 @pytest.mark.parametrize("budget", [500, 1600, 3000, 6000, 12000])
 async def test_context_obeys_budget_and_does_not_mutate_offsets(config, tmp_path, budget):
     path = tmp_path / "long.txt"
-    path.write_text("Context with emoji 🧬 evidence metric. " * 300)
+    path.write_text("Context with emoji 🧬 evidence metric. " * 300, encoding="utf-8", newline="\n")
     async with CiteFabricClient(config) as client:
         imported = await client.import_document(path)
         found = await client.find_evidence(
