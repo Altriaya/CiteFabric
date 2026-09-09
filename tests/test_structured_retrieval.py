@@ -19,6 +19,11 @@ CONDITIONS = list(
 )
 
 
+def write_fixture(path, text: str) -> None:
+    """Write deterministic UTF-8/LF test input on every supported platform."""
+    path.write_text(text, encoding="utf-8", newline="\n")
+
+
 @pytest.mark.parametrize("dataset,method,metric", CONDITIONS)
 async def test_condition_variants_keep_original_headers_and_values(
     config, tmp_path, dataset, method, metric
@@ -34,7 +39,7 @@ async def test_condition_variants_keep_original_headers_and_values(
             + "\n\n"
         )
     path = tmp_path / "tables.txt"
-    path.write_text("".join(tables))
+    write_fixture(path, "".join(tables))
     async with CiteFabricClient(config) as client:
         doc = await client.import_document(path)
         result = await client.find_evidence(
@@ -53,7 +58,9 @@ async def test_condition_variants_keep_original_headers_and_values(
             evidence = client.store.evidence(hit["evidence"]["evidence_id"])
             assert (
                 evidence.excerpt
-                == path.read_text()[evidence.locator.char_start : evidence.locator.char_end]
+                == path.read_text(encoding="utf-8")[
+                    evidence.locator.char_start : evidence.locator.char_end
+                ]
             )
         assert all(b["requirements_status"] != "complete" for b in result.data["bundles"])
 
@@ -62,10 +69,11 @@ async def test_condition_variants_keep_original_headers_and_values(
 async def test_scope_variants_preserve_negation_and_conditions(config, tmp_path, number):
     name = f"Method{number}"
     path = tmp_path / "scope.txt"
-    path.write_text(
+    write_fixture(
+        path,
         f"Results\n{name} improved accuracy in the evaluated experiment.\n"
         + "Experimental details and useful observations. " * 60
-        + f"\nLimitations\n{name} was tested only on adult samples under fixed lighting. This does not establish performance for children or changing conditions.\nFuture work\n{name} could be tested in additional environments in future research.\n"
+        + f"\nLimitations\n{name} was tested only on adult samples under fixed lighting. This does not establish performance for children or changing conditions.\nFuture work\n{name} could be tested in additional environments in future research.\n",
     )
     async with CiteFabricClient(config) as client:
         imported = await client.import_document(path)
@@ -84,9 +92,10 @@ async def test_scope_variants_preserve_negation_and_conditions(config, tmp_path,
 @pytest.mark.parametrize("budget", [500, 800, 1100, 1600, 3000, 6000, 12000, 16000])
 async def test_dual_budget_and_old_evidence(config, tmp_path, budget):
     path = tmp_path / "budget.txt"
-    path.write_text(
+    write_fixture(
+        path,
         "Table 1: Solar19 ModelFir results\nMethod Score Cost\nModelFir 72.1 53.2 8.1\n\n"
-        + "Solar19 ModelFir results with explanatory context 🧬. " * 170
+        + "Solar19 ModelFir results with explanatory context 🧬. " * 170,
     )
     async with CiteFabricClient(config) as client:
         doc = await client.import_document(path)
@@ -119,7 +128,7 @@ async def test_dual_budget_and_old_evidence(config, tmp_path, budget):
 
 async def test_missing_configuration_is_not_certified(config, tmp_path):
     path = tmp_path / "absent.txt"
-    path.write_text("Table 1: River17 data\nMethod MAEC MAEP\nModelOak 1.2 2.3 4.5\n")
+    write_fixture(path, "Table 1: River17 data\nMethod MAEC MAEP\nModelOak 1.2 2.3 4.5\n")
     async with CiteFabricClient(config) as client:
         doc = await client.import_document(path)
         result = await client.find_evidence(
@@ -134,7 +143,7 @@ async def test_missing_configuration_is_not_certified(config, tmp_path):
 
 async def test_cancelled_and_concurrent_index_build_is_atomic(config, tmp_path):
     path = tmp_path / "index.txt"
-    path.write_text("Table 1: River17 data\nModelOak 1.2 2.3 4.5\n")
+    write_fixture(path, "Table 1: River17 data\nModelOak 1.2 2.3 4.5\n")
     async with CiteFabricClient(config) as client:
         doc = await client.import_document(path)
         extraction = client.store.extraction(doc.data["extraction_id"])
@@ -164,7 +173,7 @@ async def test_failed_index_falls_back_explicitly(config, tmp_path, monkeypatch)
         raise FabricError("structure_index_limit", "test limit")
 
     path = tmp_path / "fallback.txt"
-    path.write_text("Table 1: River17 study. ModelOak measured 42 percent accuracy.")
+    write_fixture(path, "Table 1: River17 study. ModelOak measured 42 percent accuracy.")
     async with CiteFabricClient(config) as client:
         doc = await client.import_document(path)
         monkeypatch.setattr(selection, "ensure_index", fail)
@@ -206,7 +215,9 @@ def test_metric_aliases_and_reference_numbers_do_not_collapse():
 
 async def test_budget_failure_is_distinguished_from_no_candidates(config, tmp_path):
     path = tmp_path / "long-atomic.txt"
-    path.write_text("Table 1: River17\n" + "An unbroken explanatory sentence without numbers " * 80)
+    write_fixture(
+        path, "Table 1: River17\n" + "An unbroken explanatory sentence without numbers " * 80
+    )
     async with CiteFabricClient(config) as client:
         doc = await client.import_document(path)
         result = await client.find_evidence(
@@ -222,10 +233,11 @@ async def test_budget_failure_is_distinguished_from_no_candidates(config, tmp_pa
 
 async def test_reference_context_uses_a_separate_exact_span(config, tmp_path):
     path = tmp_path / "reference.txt"
-    path.write_text(
+    write_fixture(
+        path,
         "Table 1: River17 measurements\nMethod MAEC MAEP\nModelOak 11.2 22.3 0.4\n\n"
         + "Unrelated details. " * 300
-        + "\nRiver17 ModelOak forecasting quality is discussed in Table 1.\n" * 12
+        + "\nRiver17 ModelOak forecasting quality is discussed in Table 1.\n" * 12,
     )
     async with CiteFabricClient(config) as client:
         doc = await client.import_document(path)
@@ -261,7 +273,7 @@ async def test_structured_evidence_does_not_cross_pages_or_documents(config, tmp
     path = tmp_path / "pages.pdf"
     writer.write(path)
     other = tmp_path / "other.txt"
-    other.write_text("Table 1: River17 ModelOak DIFFERENT_DOCUMENT\nModelOak 99.9 99.8 99.7\n")
+    write_fixture(other, "Table 1: River17 ModelOak DIFFERENT_DOCUMENT\nModelOak 99.9 99.8 99.7\n")
     async with CiteFabricClient(config) as client:
         doc = await client.import_document(path)
         await client.import_document(other)
