@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CiteFabric Round 4 separated query and gold fixtures",
+  "description": "Draft evaluation contract, not a product API. Queries and gold are separate files; gold must never be mounted in retrieval execution.",
+  "oneOf": [{"$ref": "#/$defs/queries"}, {"$ref": "#/$defs/gold"}],
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]*$"},
+    "hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "text": {"type": "string", "minLength": 1},
+    "ids": {"type": "array", "items": {"$ref": "#/$defs/id"}, "uniqueItems": true},
+    "bilingual": {
+      "type": "object", "additionalProperties": false,
+      "required": ["en", "zh"],
+      "properties": {"en": {"$ref": "#/$defs/text"}, "zh": {"$ref": "#/$defs/text"}}
+    },
+    "review": {
+      "type": "object", "additionalProperties": false,
+      "required": ["author_id", "reviewer_ids", "independence", "saw_retrieval_outputs", "adjudication"],
+      "properties": {
+        "author_id": {"$ref": "#/$defs/id"},
+        "reviewer_ids": {"$ref": "#/$defs/ids"},
+        "independence": {"enum": ["independent_review", "self_review"]},
+        "saw_retrieval_outputs": {"type": "boolean"},
+        "adjudication": {"$ref": "#/$defs/text"}
+      }
+    },
+    "paper": {
+      "type": "object", "additionalProperties": false,
+      "required": ["paper_id", "family_id", "title", "domain", "source_url", "filename", "sha256", "pages", "edition_label", "metadata_basis", "layer", "challenges"],
+      "properties": {
+        "paper_id": {"$ref": "#/$defs/id"}, "family_id": {"$ref": "#/$defs/id"},
+        "title": {"$ref": "#/$defs/text"}, "domain": {"$ref": "#/$defs/id"},
+        "source_url": {"type": "string", "pattern": "^https://"},
+        "filename": {"type": "string", "pattern": "^[^/\\\\]+\\.pdf$"},
+        "sha256": {"$ref": "#/$defs/hash"}, "pages": {"type": "integer", "minimum": 1},
+        "edition_label": {"$ref": "#/$defs/text"},
+        "metadata_basis": {"$ref": "#/$defs/text"},
+        "layer": {"enum": ["core", "stress"]},
+        "challenges": {"type": "array", "items": {"enum": ["narrative", "single_page_table", "multi_page_table", "multi_level_header", "figure", "formula", "glyphs", "scan"]}, "minItems": 1, "uniqueItems": true}
+      }
+    },
+    "intent": {
+      "type": "object", "additionalProperties": false,
+      "required": ["intent_id", "parent_intent_id", "paper_id", "query", "claim", "equivalence_review"],
+      "properties": {
+        "intent_id": {"$ref": "#/$defs/id"},
+        "parent_intent_id": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/id"}]},
+        "paper_id": {"$ref": "#/$defs/id"},
+        "query": {"$ref": "#/$defs/bilingual"}, "claim": {"$ref": "#/$defs/bilingual"},
+        "equivalence_review": {"$ref": "#/$defs/review"}
+      }
+    },
+    "queries": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "kind", "protocol_version", "cohort_id", "split", "status", "papers", "intents"],
+      "properties": {
+        "schema_version": {"const": "round4-0.1"}, "kind": {"const": "queries"},
+        "protocol_version": {"$ref": "#/$defs/text"}, "cohort_id": {"$ref": "#/$defs/id"},
+        "split": {"enum": ["pilot", "development", "holdout"]},
+        "status": {"enum": ["draft", "frozen", "opened"]},
+        "papers": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/paper"}},
+        "intents": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/intent"}}
+      }
+    },
+    "span": {
+      "type": "object", "additionalProperties": false,
+      "required": ["span_id", "unit_index", "page", "start", "end", "quote", "role"],
+      "properties": {
+        "span_id": {"$ref": "#/$defs/id"},
+        "unit_index": {"type": "integer", "minimum": 0},
+        "page": {"type": "integer", "minimum": 1},
+        "start": {"type": "integer", "minimum": 0}, "end": {"type": "integer", "minimum": 1},
+        "quote": {"$ref": "#/$defs/text"},
+        "role": {"enum": ["definition", "condition", "result", "limitation", "counterevidence"]}
+      }
+    },
+    "requirement": {
+      "type": "object", "additionalProperties": false,
+      "required": ["requirement_id", "dimension", "description", "span_ids", "visual_requirements", "relation", "derivation"],
+      "properties": {
+        "requirement_id": {"$ref": "#/$defs/id"},
+        "dimension": {"enum": ["dataset", "model", "metric", "direction", "baseline", "value", "unit", "scope", "method", "definition", "other"]},
+        "description": {"$ref": "#/$defs/text"},
+        "span_ids": {"$ref": "#/$defs/ids"},
+        "visual_requirements": {
+          "type": "array", "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["page", "description"],
+            "properties": {"page": {"type": "integer", "minimum": 1}, "description": {"$ref": "#/$defs/text"}}
+          }
+        },
+        "relation": {"$ref": "#/$defs/text"},
+        "derivation": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/text"}]}
+      },
+      "anyOf": [
+        {"properties": {"span_ids": {"minItems": 1}}},
+        {"properties": {"visual_requirements": {"minItems": 1}}}
+      ]
+    },
+    "gold_case": {
+      "type": "object", "additionalProperties": false,
+      "required": ["intent_id", "paper_id", "source_sha256", "extraction_text_sha256", "reference_verdict", "rationale", "tags", "spans", "requirements", "sufficient_sets", "absence_review", "review"],
+      "properties": {
+        "intent_id": {"$ref": "#/$defs/id"}, "paper_id": {"$ref": "#/$defs/id"},
+        "source_sha256": {"$ref": "#/$defs/hash"}, "extraction_text_sha256": {"oneOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]},
+        "reference_verdict": {"enum": ["supported", "contradicted", "insufficient"]},
+        "rationale": {"$ref": "#/$defs/text"},
+        "tags": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["method_definition", "metric_direction", "table_numeric", "scope_limitation", "condition_counterexample", "unreported_configuration", "figure_formula", "extraction_gap"]}},
+        "spans": {"type": "array", "items": {"$ref": "#/$defs/span"}},
+        "requirements": {"type": "array", "items": {"$ref": "#/$defs/requirement"}},
+        "sufficient_sets": {"type": "array", "uniqueItems": true, "items": {"allOf": [{"$ref": "#/$defs/ids"}], "minItems": 1}},
+        "absence_review": {
+          "oneOf": [{"type": "null"}, {
+            "type": "object", "additionalProperties": false,
+            "required": ["sections_reviewed", "terms_searched", "missing_conditions", "limitations"],
+            "properties": {
+              "sections_reviewed": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/text"}},
+              "terms_searched": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/text"}},
+              "missing_conditions": {"$ref": "#/$defs/text"}, "limitations": {"$ref": "#/$defs/text"}
+            }
+          }]
+        },
+        "review": {"$ref": "#/$defs/review"}
+      },
+      "allOf": [{
+        "if": {"properties": {"reference_verdict": {"const": "insufficient"}}},
+        "then": {"properties": {"sufficient_sets": {"maxItems": 0}, "absence_review": {"type": "object"}}},
+        "else": {"properties": {"sufficient_sets": {"minItems": 1}, "requirements": {"minItems": 1}, "absence_review": {"type": "null"}}}
+      }]
+    },
+    "gold": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "kind", "protocol_version", "cohort_id", "queries_sha256", "cases"],
+      "properties": {
+        "schema_version": {"const": "round4-0.1"}, "kind": {"const": "gold"},
+        "protocol_version": {"$ref": "#/$defs/text"}, "cohort_id": {"$ref": "#/$defs/id"},
+        "queries_sha256": {"$ref": "#/$defs/hash"},
+        "cases": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/gold_case"}}
+      }
+    }
+  }
+}

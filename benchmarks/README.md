@@ -1,5 +1,7 @@
 # 真实论文检查集
 
+下一阶段见 [Round 4 冻结候选](round4/README.md)：评测协议、fixture schema、gold rubric、promotion gate 和配套工具已经形成候选版本。已完成的 opened self-review 开发实验见 [Round 4 开发结果](round4/development-results.md)；它不属于独立盲测，也未更改默认检索策略。
+
 `real_papers.json` 包含 BACKTIME、TDBA、TimeGuard 的 20 组中文问题、待核对论断、英文检索词、参考答案和原文锚点。页码采用从 1 开始的 PDF 物理页。
 
 检查集基于 2026-09-08 用户提供的三个 PDF，由助手阅读原文后准备，包括 10 条 supported、8 条 contradicted、2 条 insufficient。它是小规模开发回归集，不是盲测、独立专家标注或语义准确率基准。PDF 不随项目分发；请在 `data_test/` 放置 JSON 所列文件名和哈希对应的版本。
