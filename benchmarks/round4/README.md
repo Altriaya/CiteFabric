@@ -7,6 +7,7 @@
 3. [Gold 标注与盲审规则](gold-rubric.md)：充分证据集、条件关系、反例和证据不足。
 4. [Promotion gate](promotion-gate.md)：最低规模、质量、完整性和成本门槛。
 5. [开发实验结果](development-results.md)：真实论文 pilot、模型查询改写和多查询融合的汇总与限制。
+6. [第二批新论文自审 pilot](blind-pilot-2-results.md)：5 篇新论文、60 个双语 intent 的封存检索结果与失败分析。
 
 开发结果页同时记录了三轴语义判断契约实验。对应公共实现为 `src/citefabric/semantic.py` 和 `scripts/semantic_contract_eval.py`；它们定义并评测未来 verifier 的输出政策，不改变 0.1 的 `verify_claim=unavailable` 行为。
 
