@@ -8,6 +8,8 @@
 4. [Promotion gate](promotion-gate.md)：最低规模、质量、完整性和成本门槛。
 5. [开发实验结果](development-results.md)：真实论文 pilot、模型查询改写和多查询融合的汇总与限制。
 
+开发结果页同时记录了三轴语义判断契约实验。对应公共实现为 `src/citefabric/semantic.py` 和 `scripts/semantic_contract_eval.py`；它们定义并评测未来 verifier 的输出政策，不改变 0.1 的 `verify_claim=unavailable` 行为。
+
 JSON Schema 检查文件形状，`scripts/round4_eval.py` 额外检查以下关系；`status=frozen` 不是独立封存证明：
 
 - 每个 ID 唯一、外键存在、gold 对 queries 一一对应、协议/批次/hash 对应。

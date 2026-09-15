@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add the experimental `SemanticAssessment` three-axis contract, conservative deterministic verdict policy, strict evidence allowlist/budget validation, public schema and an opened-development evaluation runner. Production `verify_claim` continues to abstain without a configured backend.
 - Add opt-in `structured_v3` retrieval: versioned text-region indexes, literal/reference matching, scope and cost context, compact spans and explicit table-reference dependencies. Default remains v2.
 - Add atomic schema 1→2 migration with a consistent pre-upgrade backup; derived index failures fall back explicitly to v2.
 - Add retrieval traces and per-extraction evidence bundles with unassessed lexical roles; source slices and historical receipts remain immutable.

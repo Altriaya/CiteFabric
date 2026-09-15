@@ -22,6 +22,8 @@
 
 第三轮增加显式 `retrieval_policy="structured_v3"`：派生结构索引、表号/图号与实体条件匹配、限定段候选、紧凑原文和引用依赖。普通解释性查询继续使用词法召回。新索引按需创建；数据库 schema 1→2 有原子迁移与一致性备份，索引失败明确回退 v2。默认检索仍为 v2，语义回执仍为 unavailable。实际设计差异及实验见 [v3 设计](retrieval-v3-design.md) 和本地 `output/validation/round3/report.md`。
 
+第四轮 opened development 实验增加 `SemanticAssessment` 契约和确定性 verdict policy。模型观察被拆为 evidence coverage、logical relation 和 absence basis；只有完整覆盖下的全部匹配或同范围互斥才能导出 supported/contradicted，缺少证据不能映射为反驳。`scripts/semantic_contract_eval.py` 负责 gold-blind prompt、严格输出 Schema、候选 ID/预算验证和开发集评分。该实验组件尚未接入 `verify_claim`，也不是可配置模型后端。
+
 六篇真实论文、38 条问题的前后对比保存于本地 `output/validation/round2/`。新论文题目在检索改动前准备，但不是盲测；所有参考判断由助手审阅来源后编写，不能视为独立专家标注。英文/中文分别统计锚点覆盖，语义准确率仍为空。实验每题 12000 字符高于产品默认 6000 字符；具体消融、字符成本和未解决问题见本地报告。
 
 ## 对初始设计的调整

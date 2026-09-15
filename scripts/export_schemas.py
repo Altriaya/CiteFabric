@@ -15,6 +15,7 @@ from citefabric.models import (
     Paper,
     Result,
 )
+from citefabric.semantic import SemanticAssessment
 
 
 def main(check=False):
@@ -33,6 +34,7 @@ def main(check=False):
                 ExtractionSnapshot,
                 EvidenceObject,
                 EvidenceReceipt,
+                SemanticAssessment,
             ]
         }
     )

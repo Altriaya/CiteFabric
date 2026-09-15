@@ -1,0 +1,139 @@
+{
+  "$defs": {
+    "ConditionAssessment": {
+      "additionalProperties": false,
+      "description": "Evidence coverage for one material condition in a claim.",
+      "properties": {
+        "claim_value": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Claim Value",
+          "type": "string"
+        },
+        "dimension": {
+          "enum": [
+            "subject",
+            "dataset",
+            "population",
+            "model",
+            "method",
+            "version",
+            "metric",
+            "value",
+            "unit",
+            "direction",
+            "baseline",
+            "time",
+            "scope",
+            "causality",
+            "other"
+          ],
+          "title": "Dimension",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 6,
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "rationale": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "matched",
+            "contradicted_same_scope",
+            "missing",
+            "ambiguous"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dimension",
+        "claim_value",
+        "status",
+        "rationale"
+      ],
+      "title": "ConditionAssessment",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Gold-blind semantic observations consumed by a deterministic policy.\n\n``coverage`` asks whether every material claim condition is present in the\nsupplied excerpts. ``relation`` distinguishes a true same-scope conflict from\nevidence that merely fails to establish the claim. ``absence_basis`` records\nwhether an absence statement is exhaustive, explicitly uncertain, or unknown.",
+  "properties": {
+    "absence_basis": {
+      "enum": [
+        "not_applicable",
+        "explicit_exhaustive_absence",
+        "explicit_lack_of_evidence",
+        "unknown_from_excerpts"
+      ],
+      "title": "Absence Basis",
+      "type": "string"
+    },
+    "cited_evidence_ids": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 6,
+      "title": "Cited Evidence Ids",
+      "type": "array"
+    },
+    "conditions": {
+      "items": {
+        "$ref": "#/$defs/ConditionAssessment"
+      },
+      "maxItems": 16,
+      "minItems": 1,
+      "title": "Conditions",
+      "type": "array"
+    },
+    "contract_version": {
+      "const": "semantic-assessment-v2",
+      "default": "semantic-assessment-v2",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "coverage": {
+      "enum": [
+        "complete",
+        "partial",
+        "none"
+      ],
+      "title": "Coverage",
+      "type": "string"
+    },
+    "rationale": {
+      "maxLength": 3000,
+      "minLength": 1,
+      "title": "Rationale",
+      "type": "string"
+    },
+    "relation": {
+      "enum": [
+        "supports",
+        "contradicts_same_scope",
+        "not_established"
+      ],
+      "title": "Relation",
+      "type": "string"
+    }
+  },
+  "required": [
+    "coverage",
+    "relation",
+    "absence_basis",
+    "conditions",
+    "rationale"
+  ],
+  "title": "SemanticAssessment",
+  "type": "object"
+}
