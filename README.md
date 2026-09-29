@@ -48,9 +48,9 @@ uv run citefabric --data-dir .citefabric/my-project evidence FABRIC_ID "query" -
 uv run citefabric --data-dir .citefabric/my-project verify "claim" --paper FABRIC_ID --edition EDITION_ID --json
 ```
 
-0.1 的 verify 返回 `unavailable / verifier_not_configured`，但凭据会保留真实原文、定位、文档哈希和 grounding 状态。
+默认配置下 verify 返回 `unavailable / verifier_not_configured`，但凭据会保留真实原文、定位、文档哈希和 grounding 状态。
 
-主线已提供 0.2 开发用的依赖注入 `VerifierBackend` 和确定性 Fake Backend，用于测试结构化语义判断、错误降级与 Receipt 回放。Fake Backend 不能通过普通 CLI 配置启用；尚未接入真实模型 provider，因此默认安装仍返回 `verifier_not_configured`。设计与当前进度见 [0.2 verifier 设计](docs/verifier-0.2-design.md)。
+主线已提供 0.2 开发用的依赖注入 `VerifierBackend`、确定性 Fake Backend 和显式启用的 OpenAI Responses API adapter。真实 adapter 使用严格结构化输出，只把冻结的 claim 与 evidence bundle 交给模型；最终 verdict 仍由本地确定性策略生成。Fake Backend 不能通过普通 CLI 配置启用，真实 provider 默认也保持关闭。设计与当前进度见 [0.2 verifier 设计](docs/verifier-0.2-design.md)。
 
 `find_evidence` 的 `query_rewrite="english_faithful"` 是默认关闭的实验接口。它只在调用方配置受审计的改写器时使用英文候选；会记录原问句、改写、模型、提示词版本和校验结果。数字、比较符号、拉丁术语或显式否定词丢失时，改写被拒绝并回退原问题。该校验不证明完整语义等价，也不启用语义 verdict。
 
@@ -107,6 +107,10 @@ sources = ["crossref", "arxiv", "openalex", "semantic_scholar"]
 search_timeout = 12
 request_timeout = 8
 verifier_timeout = 30
+verifier_provider = "none"
+verifier_model = "gpt-5.5-2026-04-23"
+verifier_reasoning_effort = "medium"
+verifier_max_output_tokens = 4096
 max_pages = 300
 offline = false
 # contact_email = "your-contact@example.org"
@@ -119,8 +123,20 @@ offline = false
 - `CITEFABRIC_CONTACT_EMAIL`：Crossref 联系信息。
 - `CITEFABRIC_SOURCES`：逗号分隔的来源列表。
 - `CITEFABRIC_OFFLINE=true`：仅使用本地数据与缓存。
+- `CITEFABRIC_VERIFIER_PROVIDER=openai`：显式启用 OpenAI 语义 verifier。
+- `CITEFABRIC_OPENAI_API_KEY`：verifier 凭据；未设置时也会读取标准 `OPENAI_API_KEY`。
+- `CITEFABRIC_VERIFIER_MODEL`、`CITEFABRIC_VERIFIER_REASONING_EFFORT`：固定模型快照与推理强度。
 
 凭据不通过命令行传入，也不会出现在 doctor 输出中。`doctor --online` 才会执行联网探针。
+
+在已经封存的 Round 2 开发证据上运行小规模真实模型实验：
+
+```bash
+uv run python scripts/openai_verifier_dev_run.py --preflight
+CITEFABRIC_OPENAI_API_KEY=... uv run python scripts/openai_verifier_dev_run.py
+```
+
+默认 pilot 固定 6 条、覆盖 5 篇论文和三种 verdict；使用 `--case Q01` 可缩小范围，使用 `--all` 才运行全部 38 条。runner 会保存输入文件哈希、模型/提示词版本、完整 Receipt、token 与费用。该数据集已经用于开发，结果只用于调试，不能作为 promotion 证据。
 
 CLI 退出码：0=ok/no_results，2=参数错误，3=partial，4=failed。`--json` 输出完整业务 Result；命令语法错误使用 CLI 自身的 stderr 诊断。
 
@@ -131,7 +147,7 @@ CLI 退出码：0=ok/no_results，2=参数错误，3=partial，4=failed。`--jso
 - 版本分别存储；不把预印本的页码或判断转移到期刊版。多版本选择需要 edition_id。
 - 自动文档绑定仅在明确 arXiv 版本、标题与权威元数据匹配时通过；其他候选仍可检索，但显示未独立确认。
 - 默认最多三篇论文、六个片段、6000 个原文字符；每版本最多四个种子片段。支持有限中文科研词汇扩展，尚无通用翻译或跨语言语义检索。
-- APA/IEEE、模型后端、Zotero/PMC、手动身份合并/拆分、自动 LRU 与独立人工评测基准属于后续工作。
+- APA/IEEE、其他模型后端、Zotero/PMC、手动身份合并/拆分、自动 LRU 与独立人工评测基准属于后续工作。
 - blob 缓存默认上限 2 GiB；当前达到上限时明确报错，不自动删除历史证据。
 
 实际实现与长期设计的差异见 [实现说明](docs/implementation.md)。

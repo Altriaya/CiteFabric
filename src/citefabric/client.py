@@ -54,7 +54,11 @@ from .retrieval import (
 )
 from .runtime import ProviderRuntime
 from .storage import Store, dump
-from .verifier_backend import VerifierBackend, VerifierBackendResult
+from .verifier_backend import (
+    VerifierBackend,
+    VerifierBackendResult,
+    configured_verifier_backend,
+)
 from .verifier_contract import (
     AtomicClaim,
     VerifierEvidence,
@@ -116,12 +120,17 @@ class CiteFabricClient:
         http_client: httpx.AsyncClient | None = None,
         query_rewriter: QueryRewriter | None = None,
         verifier_backend: VerifierBackend | None = None,
+        verifier_http_client: httpx.AsyncClient | None = None,
     ):
         self.config = config or Config.load()
         self.store = Store(self.config.data_dir, self.config.cache_bytes)
         self.runtime = ProviderRuntime(self.config, self.store, http_client)
         self.query_rewriter = query_rewriter
-        self.verifier_backend = verifier_backend
+        self.verifier_backend = (
+            verifier_backend
+            if verifier_backend is not None
+            else configured_verifier_backend(self.config, verifier_http_client)
+        )
         self.providers = {
             name: DiscoveryProvider(name, self.runtime)
             for name in ("crossref", "arxiv", "openalex", "semantic_scholar")
@@ -135,6 +144,9 @@ class CiteFabricClient:
 
     async def close(self):
         await self.runtime.close()
+        close_verifier = getattr(self.verifier_backend, "close", None)
+        if close_verifier is not None:
+            await close_verifier()
         self.store.close()
 
     def _detail(self, edition: Edition) -> dict:
@@ -983,6 +995,7 @@ class CiteFabricClient:
                     failure_code = (
                         exc.code if isinstance(exc, FabricError) else "invalid_model_output"
                     )
+                    retryable = exc.retryable if isinstance(exc, FabricError) else False
                 except Exception:
                     failure_code, retryable = "verifier_failed", True
                 elapsed_ms = int((time.monotonic() - started) * 1000)
@@ -1012,6 +1025,7 @@ class CiteFabricClient:
                         provider=backend_result.provider,
                         model=backend_result.model,
                         model_revision=backend_result.model_revision,
+                        response_id=backend_result.response_id,
                         prompt_version=backend_result.prompt_version,
                         prompt_hash=backend_result.prompt_hash,
                         input_hash=sha(dump(verifier_request.model_dump(mode="json")).encode()),
@@ -1020,6 +1034,7 @@ class CiteFabricClient:
                         ),
                         attempts=backend_result.attempts,
                         fallback_used=backend_result.fallback_used,
+                        pricing_version=backend_result.pricing_version,
                     )
                 assessment = ClaimAssessment(
                     claim_id=claim_obj.claim_id,
@@ -1060,6 +1075,7 @@ class CiteFabricClient:
                     provider=backend_result.provider,
                     model=backend_result.model,
                     model_revision=backend_result.model_revision,
+                    response_id=backend_result.response_id,
                     prompt_version=backend_result.prompt_version,
                     prompt_hash=backend_result.prompt_hash,
                     input_hash=sha(dump(verifier_request.model_dump(mode="json")).encode()),
@@ -1067,6 +1083,7 @@ class CiteFabricClient:
                     elapsed_ms=elapsed_ms,
                     attempts=backend_result.attempts,
                     fallback_used=backend_result.fallback_used,
+                    pricing_version=backend_result.pricing_version,
                     usage=backend_result.usage,
                 )
                 relations: list[dict[str, str]] = []
@@ -1123,7 +1140,9 @@ class CiteFabricClient:
                     verifier=provenance.model_dump(mode="json"),
                     usage=dict(
                         input_tokens=backend_result.usage.input_tokens,
+                        cached_input_tokens=backend_result.usage.cached_input_tokens,
                         output_tokens=backend_result.usage.output_tokens,
+                        reasoning_output_tokens=backend_result.usage.reasoning_output_tokens,
                         cost=backend_result.usage.cost_usd,
                         currency="USD" if backend_result.usage.cost_usd is not None else None,
                     ),
@@ -1308,6 +1327,18 @@ class CiteFabricClient:
             api_keys=dict(
                 openalex=bool(self.config.openalex_api_key),
                 semantic_scholar=bool(self.config.semantic_scholar_api_key),
+                openai=bool(self.config.openai_api_key),
+            ),
+            verifier_config=dict(
+                provider=self.config.verifier_provider,
+                model=(
+                    self.config.verifier_model
+                    if self.config.verifier_provider == "openai"
+                    else None
+                ),
+                credentials_configured=bool(self.config.openai_api_key)
+                if self.config.verifier_provider == "openai"
+                else None,
             ),
         )
         if online:

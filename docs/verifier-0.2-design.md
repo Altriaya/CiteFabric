@@ -1,6 +1,6 @@
 # CiteFabric 0.2 semantic verifier contract
 
-状态：接口、Fake Backend 核验流水线与验收协议已实现。尚未接入收费或联网模型；未注入 Backend 时仍保持 `verify_claim=unavailable`。
+状态：接口、Fake Backend、OpenAI Responses API adapter 与验收协议已实现。真实 provider 必须显式启用；默认仍保持 `verify_claim=unavailable`。当前仓库环境未配置 API key，因此尚无真实 GPT-5.5 评分结果。
 
 ## 目标
 
@@ -29,7 +29,7 @@
 
 论文正文和 evidence excerpt 一律作为不可信数据。后端提示词必须把指令与证据分隔，并明确忽略正文内的操作要求；模型无权调用工具、联网、变更证据或选择另一版本论文。
 
-## 模型接入顺序
+## 模型接入状态
 
 已完成：
 
@@ -37,12 +37,16 @@
 2. `CiteFabricClient.verify_claim` 已执行 Backend 调用、超时、Schema、atom、Evidence ID、预算和哈希校验。
 3. 合法输出由确定性 policy 生成 verdict 和不可变 Receipt；非法输出、超时、无证据和未配置状态均保存 `unavailable` Receipt 与独立 reason code。
 4. SDK 和 MCP handler 已用 Fake Backend 跑通，默认 CLI 仍拒答，避免测试判断被用户误启用。
+5. [`openai_verifier.py`](../src/citefabric/openai_verifier.py) 使用 Responses API 的严格 JSON Schema 输出，禁用工具与服务端存储，并映射认证、限流、超时、服务故障和非法输出。
+6. provider、模型快照、reasoning effort、输出预算与凭据已加入配置；`doctor` 只报告凭据是否存在，不输出凭据值。
+7. [`openai_verifier_dev_run.py`](../scripts/openai_verifier_dev_run.py) 对已冻结开发证据执行可复现实验，保存输入哈希、响应 ID、token、费用与 Receipt，并确保 gold 不进入模型请求。
 
-下一步：
+adapter 当前固定默认模型为 `gpt-5.5-2026-04-23`，价格计算按 2026-09-29 查阅的官方模型页版本化。OpenAI 官方文档说明 GPT-5.5 支持 Responses API 与 Structured Outputs；Responses API 的严格结构化输出通过 `text.format` 提交 JSON Schema：
 
-1. 实现一个显式配置的真实 provider adapter，使用结构化输出生成 `VerifierResponse`。
-2. 将 provider 凭据、模型名和预算加入本地配置，默认继续为 `none`。
-3. 使用现有 opened development set 调试 prompt、延迟、费用与错误恢复；冻结后才进入全新留出集。
+- <https://developers.openai.com/api/docs/models/gpt-5.5>
+- <https://developers.openai.com/api/docs/guides/structured-outputs>
+
+下一步是使用真实凭据运行六条 opened-development pilot，检查结构化输出可靠性、三类错误、延迟和费用。prompt 冻结后才进入全新留出集。
 
 凭据只从环境变量或本地配置读取，不进入 CLI 参数、日志、Receipt 或测试 fixture。真实模型测试使用手动 CI；普通 PR CI 使用假的确定性 backend。
 
@@ -50,4 +54,4 @@
 
 [`benchmarks/verifier_v0_2`](../benchmarks/verifier_v0_2) 固定语料规模、gold 标注规则和 promotion gate。已有 Round 4 开发论文只能用于调试，不得进入 promotion holdout。
 
-当前实现证明核验器可以在不需要 API Key 的情况下贯通 SDK、MCP、确定性校验与 Receipt。只有真实 provider 在全新留出集通过 gate，生产 `verify_claim` 才能从默认拒答升级为语义判断。
+当前实现与模拟 HTTP 测试证明核验器可以贯通 SDK、MCP、真实 API 协议形状、确定性校验与 Receipt；这不等于真实模型准确率。只有真实 provider 在全新留出集通过 gate，生产 `verify_claim` 才能从默认拒答升级为语义判断。

@@ -116,8 +116,18 @@ class VerifierResponse(Model):
 
 class VerifierUsage(Model):
     input_tokens: int = Field(ge=0)
+    cached_input_tokens: int = Field(default=0, ge=0)
     output_tokens: int = Field(ge=0)
+    reasoning_output_tokens: int = Field(default=0, ge=0)
     cost_usd: float | None = Field(default=None, ge=0)
+
+    @model_validator(mode="after")
+    def valid_token_breakdown(self):
+        if self.cached_input_tokens > self.input_tokens:
+            raise ValueError("cached input tokens cannot exceed input tokens")
+        if self.reasoning_output_tokens > self.output_tokens:
+            raise ValueError("reasoning output tokens cannot exceed output tokens")
+        return self
 
 
 class VerifierProvenance(Model):
@@ -126,6 +136,7 @@ class VerifierProvenance(Model):
     provider: str = Field(min_length=1, max_length=100)
     model: str = Field(min_length=1, max_length=200)
     model_revision: str | None = Field(default=None, max_length=200)
+    response_id: str | None = Field(default=None, max_length=200)
     prompt_version: str = Field(min_length=1, max_length=100)
     prompt_hash: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
     input_hash: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
@@ -134,6 +145,7 @@ class VerifierProvenance(Model):
     elapsed_ms: int = Field(ge=0)
     attempts: int = Field(ge=1, le=3)
     fallback_used: bool = False
+    pricing_version: str | None = Field(default=None, max_length=100)
     usage: VerifierUsage
 
 

@@ -3,6 +3,12 @@
     "VerifierUsage": {
       "additionalProperties": false,
       "properties": {
+        "cached_input_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Cached Input Tokens",
+          "type": "integer"
+        },
         "cost_usd": {
           "anyOf": [
             {
@@ -24,6 +30,12 @@
         "output_tokens": {
           "minimum": 0,
           "title": "Output Tokens",
+          "type": "integer"
+        },
+        "reasoning_output_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Reasoning Output Tokens",
           "type": "integer"
         }
       },
@@ -89,6 +101,19 @@
       "title": "Policy Version",
       "type": "string"
     },
+    "pricing_version": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pricing Version"
+    },
     "prompt_hash": {
       "pattern": "^sha256:[0-9a-f]{64}$",
       "title": "Prompt Hash",
@@ -105,6 +130,19 @@
       "minLength": 1,
       "title": "Provider",
       "type": "string"
+    },
+    "response_id": {
+      "anyOf": [
+        {
+          "maxLength": 200,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Response Id"
     },
     "usage": {
       "$ref": "#/$defs/VerifierUsage"

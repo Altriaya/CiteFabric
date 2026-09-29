@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import tomllib
 from pathlib import Path
+from typing import Literal
 
 from platformdirs import user_config_path, user_data_path
 from pydantic import Field, SecretStr, model_validator
@@ -18,10 +19,15 @@ class Config(Model):
     contact_email: str | None = None
     openalex_api_key: SecretStr | None = None
     semantic_scholar_api_key: SecretStr | None = None
+    openai_api_key: SecretStr | None = None
     search_timeout: float = Field(default=12, gt=0, le=60)
     request_timeout: float = Field(default=8, gt=0, le=30)
     evidence_timeout: float = Field(default=45, gt=0, le=120)
     verifier_timeout: float = Field(default=30, gt=0, le=120)
+    verifier_provider: Literal["none", "openai"] = "none"
+    verifier_model: str = Field(default="gpt-5.5-2026-04-23", min_length=1, max_length=200)
+    verifier_reasoning_effort: Literal["none", "low", "medium", "high", "xhigh"] = "medium"
+    verifier_max_output_tokens: int = Field(default=4096, ge=512, le=16000)
     parse_timeout: float = Field(default=20, gt=0, le=60)
     max_download_bytes: int = Field(default=25 * 1024 * 1024, gt=0, le=100 * 1024 * 1024)
     max_pages: int = Field(default=300, ge=1, le=1000)
@@ -43,5 +49,7 @@ class Config(Model):
             if key in os.environ:
                 raw = os.environ[key]
                 values[name] = raw.split(",") if name == "sources" else raw
+        if "openai_api_key" not in values and os.getenv("OPENAI_API_KEY"):
+            values["openai_api_key"] = os.environ["OPENAI_API_KEY"]
         values.update({k: v for k, v in overrides.items() if v is not None})
         return cls.model_validate(values)

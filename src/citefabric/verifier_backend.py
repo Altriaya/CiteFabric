@@ -12,6 +12,7 @@ from typing import Protocol
 
 from pydantic import Field
 
+from .config import Config
 from .models import Model, sha
 from .verifier_contract import VerifierRequest, VerifierResponse, VerifierUsage
 
@@ -21,10 +22,12 @@ class VerifierBackendResult(Model):
     provider: str = Field(min_length=1, max_length=100)
     model: str = Field(min_length=1, max_length=200)
     model_revision: str | None = Field(default=None, max_length=200)
+    response_id: str | None = Field(default=None, max_length=200)
     prompt_version: str = Field(min_length=1, max_length=100)
     prompt_hash: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
     attempts: int = Field(default=1, ge=1, le=3)
     fallback_used: bool = False
+    pricing_version: str | None = Field(default=None, max_length=100)
     usage: VerifierUsage = Field(
         default_factory=lambda: VerifierUsage(input_tokens=0, output_tokens=0)
     )
@@ -67,3 +70,15 @@ class FakeVerifierBackend:
             prompt_version="fake-verifier-v1",
             prompt_hash=sha(b"fake-verifier-v1"),
         )
+
+
+def configured_verifier_backend(config: Config, http_client=None) -> VerifierBackend | None:
+    """Create only the backend explicitly selected in local configuration."""
+
+    if config.verifier_provider == "none":
+        return None
+    if config.verifier_provider == "openai":
+        from .openai_verifier import OpenAIVerifierBackend
+
+        return OpenAIVerifierBackend(config, http_client=http_client)
+    raise ValueError("Unsupported verifier provider.")
