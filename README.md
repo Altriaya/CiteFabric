@@ -179,6 +179,6 @@ uv run python scripts/export_schemas.py --check
 uv build
 ```
 
-离线测试包含真实 stdio MCP 子进程和 PDF 解析进程。CI 已配置 macOS、Windows、Linux 与 Python 3.11/3.13 矩阵；配置存在不代表远程 CI 已运行。
+离线测试包含真实 stdio MCP 子进程和 PDF 解析进程。macOS、Windows、Linux 与 Python 3.11/3.13 的远程矩阵及公网 arXiv 黄金路径均已通过，范围和证据见 [0.1 发布验收](docs/release-readiness-0.1.md)。
 
 [架构](docs/architecture.md) · [契约](docs/contracts.md) · [验收计划](docs/delivery.md) · [JSON Schema](schemas/0.1) · [贡献指南](CONTRIBUTING.md) · [Apache-2.0 许可](LICENSE)
