@@ -21,6 +21,7 @@ class Config(Model):
     search_timeout: float = Field(default=12, gt=0, le=60)
     request_timeout: float = Field(default=8, gt=0, le=30)
     evidence_timeout: float = Field(default=45, gt=0, le=120)
+    verifier_timeout: float = Field(default=30, gt=0, le=120)
     parse_timeout: float = Field(default=20, gt=0, le=60)
     max_download_bytes: int = Field(default=25 * 1024 * 1024, gt=0, le=100 * 1024 * 1024)
     max_pages: int = Field(default=300, ge=1, le=1000)

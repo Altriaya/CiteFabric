@@ -39,7 +39,7 @@ TOOLS: dict[str, tuple[type[BaseModel], str]] = {
     ),
     "verify_claim": (
         VerifyRequest,
-        "Create a claim-to-evidence audit receipt. In 0.1 semantic verification is unavailable; never interprets lexical matches as support.",
+        "Create a claim-to-evidence audit receipt. Produces a semantic verdict only when a verifier backend is explicitly configured.",
     ),
     "export_citations": (
         ExportRequest,
@@ -73,7 +73,7 @@ def create_server(client: CiteFabricClient) -> Server:
     server = Server(
         "citefabric",
         version="0.1.0",
-        instructions="Paper existence, text grounding, and claim support are separate. 0.1 does not provide semantic support verdicts. Use explicit editions for evidence and citations.",
+        instructions="Paper existence, text grounding, and claim support are separate. Without an explicitly configured verifier backend, claim verification abstains. Use explicit editions for evidence and citations.",
     )
 
     @server.list_tools()

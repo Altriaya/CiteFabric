@@ -1,6 +1,6 @@
 # CiteFabric 0.2 semantic verifier contract
 
-状态：接口与验收协议冻结候选。它不启用模型，也不改变 0.1 的 `verify_claim=unavailable` 行为。
+状态：接口、Fake Backend 核验流水线与验收协议已实现。尚未接入收费或联网模型；未注入 Backend 时仍保持 `verify_claim=unavailable`。
 
 ## 目标
 
@@ -31,12 +31,18 @@
 
 ## 模型接入顺序
 
-1. 定义 `VerifierBackend` 协议和一个显式配置的 provider 实现。
-2. 使用结构化输出生成 `VerifierResponse`，失败输出不得进入 Receipt。
-3. 校验 schema、atom 覆盖、Evidence ID allowlist、字符预算和哈希。
-4. 应用确定性 verdict policy。
-5. 将 `VerifierProvenance`、原始结构化输出哈希和最终 verdict 写入不可变 Receipt。
-6. 为超时、限流、无效输出和未配置状态返回不同 reason code。
+已完成：
+
+1. [`verifier_backend.py`](../src/citefabric/verifier_backend.py) 定义异步 `VerifierBackend` 协议、结构化结果 envelope 和只能依赖注入的 `FakeVerifierBackend`。
+2. `CiteFabricClient.verify_claim` 已执行 Backend 调用、超时、Schema、atom、Evidence ID、预算和哈希校验。
+3. 合法输出由确定性 policy 生成 verdict 和不可变 Receipt；非法输出、超时、无证据和未配置状态均保存 `unavailable` Receipt 与独立 reason code。
+4. SDK 和 MCP handler 已用 Fake Backend 跑通，默认 CLI 仍拒答，避免测试判断被用户误启用。
+
+下一步：
+
+1. 实现一个显式配置的真实 provider adapter，使用结构化输出生成 `VerifierResponse`。
+2. 将 provider 凭据、模型名和预算加入本地配置，默认继续为 `none`。
+3. 使用现有 opened development set 调试 prompt、延迟、费用与错误恢复；冻结后才进入全新留出集。
 
 凭据只从环境变量或本地配置读取，不进入 CLI 参数、日志、Receipt 或测试 fixture。真实模型测试使用手动 CI；普通 PR CI 使用假的确定性 backend。
 
@@ -44,4 +50,4 @@
 
 [`benchmarks/verifier_v0_2`](../benchmarks/verifier_v0_2) 固定语料规模、gold 标注规则和 promotion gate。已有 Round 4 开发论文只能用于调试，不得进入 promotion holdout。
 
-接入 provider 以前，本阶段完成的只是“可实现且可验收的契约”。只有全新留出集通过 gate，生产 `verify_claim` 才能从默认拒答升级为语义判断。
+当前实现证明核验器可以在不需要 API Key 的情况下贯通 SDK、MCP、确定性校验与 Receipt。只有真实 provider 在全新留出集通过 gate，生产 `verify_claim` 才能从默认拒答升级为语义判断。

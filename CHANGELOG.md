@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add the dependency-injected `VerifierBackend`, a deterministic test backend, backend timeout and failure isolation, validated semantic verdicts, provenance-rich receipts, citation status propagation, and SDK/MCP integration coverage. No hosted model provider is enabled by default.
 - Freeze the candidate 0.2 verifier request/response and provenance contracts, exact atomic-claim spans, evidence allowlist checks, deterministic composite verdict policy, and an executable sealed-holdout promotion gate. The model backend remains unconfigured.
 - Add the experimental `SemanticAssessment` three-axis contract, conservative deterministic verdict policy, strict evidence allowlist/budget validation, public schema and an opened-development evaluation runner. Production `verify_claim` continues to abstain without a configured backend.
 - Add opt-in `structured_v3` retrieval: versioned text-region indexes, literal/reference matching, scope and cost context, compact spans and explicit table-reference dependencies. Default remains v2.

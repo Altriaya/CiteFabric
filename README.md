@@ -50,6 +50,8 @@ uv run citefabric --data-dir .citefabric/my-project verify "claim" --paper FABRI
 
 0.1 的 verify 返回 `unavailable / verifier_not_configured`，但凭据会保留真实原文、定位、文档哈希和 grounding 状态。
 
+主线已提供 0.2 开发用的依赖注入 `VerifierBackend` 和确定性 Fake Backend，用于测试结构化语义判断、错误降级与 Receipt 回放。Fake Backend 不能通过普通 CLI 配置启用；尚未接入真实模型 provider，因此默认安装仍返回 `verifier_not_configured`。设计与当前进度见 [0.2 verifier 设计](docs/verifier-0.2-design.md)。
+
 `find_evidence` 的 `query_rewrite="english_faithful"` 是默认关闭的实验接口。它只在调用方配置受审计的改写器时使用英文候选；会记录原问句、改写、模型、提示词版本和校验结果。数字、比较符号、拉丁术语或显式否定词丢失时，改写被拒绝并回退原问题。该校验不证明完整语义等价，也不启用语义 verdict。
 
 ## MCP 配置
@@ -104,6 +106,7 @@ asyncio.run(main())
 sources = ["crossref", "arxiv", "openalex", "semantic_scholar"]
 search_timeout = 12
 request_timeout = 8
+verifier_timeout = 30
 max_pages = 300
 offline = false
 # contact_email = "your-contact@example.org"

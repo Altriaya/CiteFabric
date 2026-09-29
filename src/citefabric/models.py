@@ -442,6 +442,12 @@ class VerifyRequest(Model):
     evidence_ids: list[str] | None = Field(default=None, min_length=1, max_length=12)
     context: str | None = Field(default=None, max_length=4000)
 
+    @model_validator(mode="after")
+    def unique_evidence(self):
+        if self.evidence_ids and len(set(self.evidence_ids)) != len(self.evidence_ids):
+            raise ValueError("evidence IDs must be unique")
+        return self
+
 
 class ExportRequest(Model):
     papers: list[PaperSelector] = Field(min_length=1, max_length=50)

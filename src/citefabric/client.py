@@ -54,6 +54,14 @@ from .retrieval import (
 )
 from .runtime import ProviderRuntime
 from .storage import Store, dump
+from .verifier_backend import VerifierBackend, VerifierBackendResult
+from .verifier_contract import (
+    AtomicClaim,
+    VerifierEvidence,
+    VerifierProvenance,
+    VerifierRequest,
+    aggregate_verifier_verdict,
+)
 
 
 def operation(fn):
@@ -107,11 +115,13 @@ class CiteFabricClient:
         *,
         http_client: httpx.AsyncClient | None = None,
         query_rewriter: QueryRewriter | None = None,
+        verifier_backend: VerifierBackend | None = None,
     ):
         self.config = config or Config.load()
         self.store = Store(self.config.data_dir, self.config.cache_bytes)
         self.runtime = ProviderRuntime(self.config, self.store, http_client)
         self.query_rewriter = query_rewriter
+        self.verifier_backend = verifier_backend
         self.providers = {
             name: DiscoveryProvider(name, self.runtime)
             for name in ("crossref", "arxiv", "openalex", "semantic_scholar")
@@ -899,41 +909,246 @@ class CiteFabricClient:
                 "invalid_argument", "Evidence does not belong to the selected paper editions."
             )
         claim_obj = Claim(text=claim, context=request.context)
-        receipts = []
+        receipts, top_limitations = [], []
         for edition in editions:
             items = [e for e in evidence if e.edition_id == edition.edition_id]
-            limitations = [
-                "No semantic verifier is installed in 0.1; lexical relevance is not claim support."
-            ]
+            limitations = []
             if any(
                 self.store.document(e.document_id).binding["status"] != "verified" for e in items
             ):
                 limitations.append("Document version binding has not been independently verified.")
-            assessment = ClaimAssessment(
-                claim_id=claim_obj.claim_id,
-                edition_id=edition.edition_id,
-                verdict="unavailable",
-                reason_code="verifier_not_configured",
-                evidence_relations=[
-                    dict(evidence_id=e.evidence_id, relation="context") for e in items
-                ],
-                rationale="Grounding checks are separate from semantic claim assessment. No support verdict was produced.",
-                limitations=limitations,
-                coverage=dict(
-                    scope="supplied_evidence_only"
-                    if request.evidence_ids
-                    else "bounded_lexical_retrieval",
-                    documents=list(dict.fromkeys(e.document_id for e in items)),
-                    evidence_ids=[e.evidence_id for e in items],
-                ),
-                verifier=dict(
-                    backend="none",
+            scope = (
+                "supplied_evidence_only" if request.evidence_ids else "bounded_lexical_retrieval"
+            )
+            failure_code = None
+            retryable = False
+            backend_id = self.verifier_backend.backend_id if self.verifier_backend else "none"
+            if self.verifier_backend is None:
+                failure_code = "verifier_not_configured"
+                limitations.insert(
+                    0,
+                    "No semantic verifier is configured; lexical relevance is not claim support.",
+                )
+            elif not items:
+                failure_code = "verifier_no_evidence"
+                limitations.insert(0, "No grounded evidence was available for semantic assessment.")
+            elif len(items) > 6 or sum(len(item.excerpt) for item in items) > 6000:
+                failure_code = "verifier_input_budget_exceeded"
+                limitations.insert(
+                    0,
+                    "The supplied evidence exceeds the verifier limit of 6 excerpts and 6000 characters.",
+                )
+
+            backend_result = None
+            verifier_request = None
+            elapsed_ms = 0
+            if failure_code is None:
+                assert self.verifier_backend is not None
+                verifier_request = VerifierRequest(
+                    claim_id=claim_obj.claim_id,
+                    claim_text=claim_obj.text,
+                    context=claim_obj.context,
+                    edition_id=edition.edition_id,
+                    atoms=[
+                        AtomicClaim(
+                            atom_id="atom:1",
+                            text=claim_obj.text,
+                            char_start=0,
+                            char_end=len(claim_obj.text),
+                            material_conditions=["other"],
+                        )
+                    ],
+                    evidence=[
+                        VerifierEvidence(
+                            evidence_id=item.evidence_id,
+                            edition_id=item.edition_id,
+                            document_id=item.document_id,
+                            source_hash=item.source_hash,
+                            excerpt=item.excerpt,
+                            excerpt_hash=item.excerpt_hash,
+                            locator=item.locator,
+                        )
+                        for item in items
+                    ],
+                )
+                started = time.monotonic()
+                try:
+                    async with asyncio.timeout(self.config.verifier_timeout):
+                        raw_backend_result = await self.verifier_backend.verify(verifier_request)
+                    backend_result = VerifierBackendResult.model_validate(raw_backend_result)
+                    aggregate_verifier_verdict(verifier_request, backend_result.response)
+                except TimeoutError:
+                    failure_code, retryable = "verifier_timeout", True
+                except (FabricError, ValidationError) as exc:
+                    failure_code = (
+                        exc.code if isinstance(exc, FabricError) else "invalid_model_output"
+                    )
+                except Exception:
+                    failure_code, retryable = "verifier_failed", True
+                elapsed_ms = int((time.monotonic() - started) * 1000)
+
+            if failure_code is not None:
+                failure_limitations = {
+                    "invalid_model_output": "The verifier returned output that failed deterministic validation.",
+                    "verifier_timeout": "The verifier did not finish within the configured timeout.",
+                    "verifier_failed": "The verifier backend failed before producing an acceptable assessment.",
+                }
+                if failure_code in failure_limitations:
+                    limitations.insert(0, failure_limitations[failure_code])
+                rationale = (
+                    "Grounding checks are separate from semantic claim assessment. "
+                    "No semantic verdict was produced."
+                )
+                failure_verifier: dict[str, Any] = dict(
+                    backend=backend_id,
                     model=None,
                     model_revision=None,
                     prompt_hash=None,
-                    policy_version="abstain-without-backend-v1",
-                ),
-            )
+                    policy_version="abstain-on-verifier-failure-v1",
+                    elapsed_ms=elapsed_ms,
+                )
+                if backend_result is not None and verifier_request is not None:
+                    failure_verifier.update(
+                        provider=backend_result.provider,
+                        model=backend_result.model,
+                        model_revision=backend_result.model_revision,
+                        prompt_version=backend_result.prompt_version,
+                        prompt_hash=backend_result.prompt_hash,
+                        input_hash=sha(dump(verifier_request.model_dump(mode="json")).encode()),
+                        rejected_output_hash=sha(
+                            dump(backend_result.response.model_dump(mode="json")).encode()
+                        ),
+                        attempts=backend_result.attempts,
+                        fallback_used=backend_result.fallback_used,
+                    )
+                assessment = ClaimAssessment(
+                    claim_id=claim_obj.claim_id,
+                    edition_id=edition.edition_id,
+                    verdict="unavailable",
+                    reason_code=failure_code,
+                    evidence_relations=[
+                        dict(evidence_id=e.evidence_id, relation="context") for e in items
+                    ],
+                    rationale=rationale,
+                    limitations=limitations,
+                    coverage=dict(
+                        scope=scope,
+                        documents=list(dict.fromkeys(e.document_id for e in items)),
+                        evidence_ids=[e.evidence_id for e in items],
+                    ),
+                    verifier=failure_verifier,
+                )
+                outcomes.append(
+                    Outcome(
+                        scope="verifier",
+                        id=backend_id,
+                        status="not_configured"
+                        if failure_code == "verifier_not_configured"
+                        else "rate_limited"
+                        if failure_code == "verifier_rate_limited"
+                        else "unavailable",
+                        code=failure_code,
+                        retryable=retryable,
+                        elapsed_ms=elapsed_ms,
+                    )
+                )
+                config_hash = sha(dump(failure_verifier).encode())
+            else:
+                assert backend_result is not None and verifier_request is not None
+                verdict = aggregate_verifier_verdict(verifier_request, backend_result.response)
+                provenance = VerifierProvenance(
+                    provider=backend_result.provider,
+                    model=backend_result.model,
+                    model_revision=backend_result.model_revision,
+                    prompt_version=backend_result.prompt_version,
+                    prompt_hash=backend_result.prompt_hash,
+                    input_hash=sha(dump(verifier_request.model_dump(mode="json")).encode()),
+                    output_hash=sha(dump(backend_result.response.model_dump(mode="json")).encode()),
+                    elapsed_ms=elapsed_ms,
+                    attempts=backend_result.attempts,
+                    fallback_used=backend_result.fallback_used,
+                    usage=backend_result.usage,
+                )
+                relations: list[dict[str, str]] = []
+                subclaims = []
+                for atom, judgment in zip(
+                    verifier_request.atoms,
+                    backend_result.response.judgments,
+                    strict=True,
+                ):
+                    atom_verdict = aggregate_verifier_verdict(
+                        verifier_request.model_copy(update={"atoms": [atom]}),
+                        backend_result.response.model_copy(update={"judgments": [judgment]}),
+                    )
+                    relation = {
+                        "supported": "supports",
+                        "contradicted": "contradicts",
+                        "insufficient_evidence": "context",
+                    }[atom_verdict]
+                    relations.extend(
+                        dict(evidence_id=identifier, relation=relation)
+                        for identifier in judgment.assessment.cited_evidence_ids
+                    )
+                    subclaims.append(
+                        dict(
+                            atom_id=atom.atom_id,
+                            text=atom.text,
+                            char_start=atom.char_start,
+                            char_end=atom.char_end,
+                            verdict=atom_verdict,
+                            conditions=[
+                                condition.model_dump(mode="json")
+                                for condition in judgment.assessment.conditions
+                            ],
+                            cited_evidence_ids=judgment.assessment.cited_evidence_ids,
+                            rationale=judgment.assessment.rationale,
+                        )
+                    )
+                assessment = ClaimAssessment(
+                    claim_id=claim_obj.claim_id,
+                    edition_id=edition.edition_id,
+                    verdict=verdict,
+                    reason_code="semantic_verifier_completed",
+                    subclaims=subclaims,
+                    evidence_relations=relations,
+                    rationale=backend_result.response.rationale,
+                    limitations=limitations,
+                    coverage=dict(
+                        scope=scope,
+                        documents=list(dict.fromkeys(e.document_id for e in items)),
+                        evidence_ids=[e.evidence_id for e in items],
+                        atoms_assessed=len(subclaims),
+                        evidence_char_budget=verifier_request.evidence_char_budget,
+                    ),
+                    verifier=provenance.model_dump(mode="json"),
+                    usage=dict(
+                        input_tokens=backend_result.usage.input_tokens,
+                        output_tokens=backend_result.usage.output_tokens,
+                        cost=backend_result.usage.cost_usd,
+                        currency="USD" if backend_result.usage.cost_usd is not None else None,
+                    ),
+                )
+                outcomes.append(
+                    Outcome(
+                        scope="verifier",
+                        id=backend_result.provider,
+                        status="ok",
+                        attempts=backend_result.attempts,
+                        elapsed_ms=elapsed_ms,
+                    )
+                )
+                config_hash = sha(
+                    dump(
+                        {
+                            "provider": provenance.provider,
+                            "model": provenance.model,
+                            "model_revision": provenance.model_revision,
+                            "prompt_version": provenance.prompt_version,
+                            "prompt_hash": provenance.prompt_hash,
+                            "policy_version": provenance.policy_version,
+                        }
+                    ).encode()
+                )
             receipt = EvidenceReceipt(
                 claim_snapshot=claim_obj,
                 metadata_snapshot_ids=[edition.metadata_snapshot_id],
@@ -955,19 +1170,13 @@ class CiteFabricClient:
                     )
                 ],
                 grounding_status="verified" if items else "not_checked",
-                verification_config_hash=sha(b'{"backend":"none"}'),
+                verification_config_hash=config_hash,
             )
             self.store.save_receipt(receipt)
             receipts.append(receipt.model_dump(mode="json"))
-        outcomes.append(
-            Outcome(
-                scope="verifier", id="none", status="not_configured", code="verifier_not_configured"
-            )
-        )
-        # A receipt saying "unavailable" is not itself a successful assessment.
-        return Result(
-            status="partial" if evidence else "failed",
-            data=dict(
+            top_limitations.extend(limitations)
+        return result_with(
+            dict(
                 receipts=receipts,
                 evidence=[e.model_dump(mode="json") for e in evidence],
                 paper_outcomes=[o.model_dump(mode="json") for o in outcomes],
@@ -976,10 +1185,10 @@ class CiteFabricClient:
                     if request.evidence_ids
                     else "bounded_lexical_retrieval"
                 ),
-                limitations=["Semantic claim verification is unavailable in 0.1."],
+                limitations=list(dict.fromkeys(top_limitations)),
             ),
             outcomes=outcomes,
-            errors=[outcome_error(o) for o in outcomes if o.status not in {"ok", "no_results"}],
+            has_data=bool(evidence),
             warnings=warnings,
         )
 
@@ -1036,7 +1245,15 @@ class CiteFabricClient:
                         grounding_status="verified"
                         if matching and all(r.grounding_status == "verified" for r in matching)
                         else "not_checked",
-                        claim_assessment_status="unavailable" if matching else "not_checked",
+                        claim_assessment_status=(
+                            "not_checked"
+                            if not matching
+                            else "unavailable"
+                            if all(r.assessment.verdict == "unavailable" for r in matching)
+                            else "assessed"
+                            if all(r.assessment.verdict != "unavailable" for r in matching)
+                            else "partial"
+                        ),
                         claim_verdicts=[
                             dict(claim_id=r.claim_snapshot.claim_id, verdict=r.assessment.verdict)
                             for r in matching
@@ -1084,7 +1301,9 @@ class CiteFabricClient:
             sqlite_fts5=True,
             offline=self.config.offline,
             sources=self.config.sources,
-            verifier="not_configured",
+            verifier=(
+                self.verifier_backend.backend_id if self.verifier_backend else "not_configured"
+            ),
             supported_formats=["bibtex", "csl_json"],
             api_keys=dict(
                 openalex=bool(self.config.openalex_api_key),

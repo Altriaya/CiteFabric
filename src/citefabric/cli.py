@@ -161,7 +161,7 @@ def verify(
     context: str | None = None,
     json: Machine = False,
 ):
-    """Create a traceable receipt; semantic verdict is unavailable in 0.1."""
+    """Create a traceable receipt; without a configured backend, abstain."""
     if edition and len(paper) != 1:
         emit(
             FabricError("invalid_argument", "--edition requires exactly one --paper.").result(),

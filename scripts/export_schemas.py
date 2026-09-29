@@ -16,6 +16,7 @@ from citefabric.models import (
     Result,
 )
 from citefabric.semantic import SemanticAssessment
+from citefabric.verifier_backend import VerifierBackendResult
 from citefabric.verifier_contract import VerifierProvenance, VerifierRequest, VerifierResponse
 
 
@@ -56,6 +57,7 @@ def main(check=False):
         "VerifierRequest": VerifierRequest,
         "VerifierResponse": VerifierResponse,
         "VerifierProvenance": VerifierProvenance,
+        "VerifierBackendResult": VerifierBackendResult,
     }
     for name, model in verifier_models.items():
         path = verifier_root / (name + ".schema.json")
