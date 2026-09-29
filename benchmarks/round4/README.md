@@ -12,6 +12,7 @@
 8. [负例配对复评与选择器消融](negative-review-selection-ablation.md)：匿名复核 insufficient 错配，并否决退步的短窗口选择原型。
 9. [8 篇论文精确跨度开发实验](span-anchored-development-results.md)：完成 1,920 次 MCP 调用，并确认带英文锚点的模板中文题不能衡量跨语言泛化。
 10. [自然中文多语检索实验](natural-chinese-multilingual-results.md)：比较 v2、本地 E5、RRF 与跨编码器，记录默认预算收益及 insufficient 暴露风险。
+11. [v6 新论文盲测 pilot](offline-v6-new-paper-pilot.md)：6 篇此前未使用的论文、60 条双语 supported intent，验证基线不变量并量化 material 路由的收益与回归。
 
 开发结果页同时记录了三轴语义判断契约实验。对应公共实现为 `src/citefabric/semantic.py` 和 `scripts/semantic_contract_eval.py`；它们定义并评测未来 verifier 的输出政策，不改变 0.1 的 `verify_claim=unavailable` 行为。
 

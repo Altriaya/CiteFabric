@@ -193,6 +193,8 @@ SDK/MCP 的 `find_evidence` 同样接收 `retrieval_policy`。v3 先在至多 60
 
 `retrieval_policy="offline_structured_v5"` 是默认关闭且已被跨论文实验拒绝的诊断策略。它在 15 条打开式开发题上达到 15/15 锚点覆盖，但在 13 篇、140 条冻结题的回溯留出评测中，英文/中文完整证据覆盖仅为 40.4%/43.1%，低于 v2 的 83.5%/60.6%。v5 不可作为发布候选；方法、失败分析和模型核验结果见 [离线 v5 实验](docs/offline-v5-experiment.md) 与 [跨论文结果](benchmarks/round4/offline-v5-retrospective-results.md)。
 
+`retrieval_policy="offline_structured_v6"` 将普通查询完整路由到 v2，只在明确数值、表图编号或联合条件出现时启用材料通道，并恢复有界上下文扩展。在 6 篇此前未使用的新论文、60 条 AI 辅助自审 supported intent 上，英文完整证据覆盖与 v2 同为 85.0%，中文为 41.7% 对 33.3%；89 个基线路由输出与 v2 全部一致。该 pilot 缺少负例、独立审阅和 promotion 所需规模，因此 v6 仍默认关闭。详见 [v6 新论文 pilot](benchmarks/round4/offline-v6-new-paper-pilot.md)。
+
 ## 开发与文档
 
 ```bash
