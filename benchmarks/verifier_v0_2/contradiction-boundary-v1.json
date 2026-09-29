@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "kind": "opened-development-contradiction-boundary",
+  "promotion_eligible": false,
+  "independence_verified": false,
+  "source_benchmark": "benchmarks/round2.json",
+  "source_benchmark_sha256": "sha256:0e87c71441b11070ee2716918576e03492c39271eaa7c98a4738a14a3fafb5a7",
+  "evidence_directory": "output/validation/offline_round2_zh_v4_20260921",
+  "rubric": "benchmarks/verifier_v0_2/gold-rubric.md",
+  "candidate_rubric_sha256": "sha256:f903a7d3ab8ec54e0c783f3767bc06ffe5ed7ec57127606745fac1ff3b40513c",
+  "frozen_rubric_sha256": "sha256:3d5818f6891176fe068b0682bde6a2ec00e900c6455a099a3d3884a03e7cbbc7",
+  "selection_frozen_before_boundary_run": true,
+  "gold_must_not_be_sent_to_model": true,
+  "case_ids": [
+    "Q03",
+    "Q05",
+    "Q07",
+    "Q09",
+    "Q15",
+    "Q20",
+    "Q21",
+    "Q23",
+    "Q26",
+    "Q29",
+    "Q31",
+    "Q35"
+  ],
+  "selection_dimensions": [
+    "metric_direction",
+    "universal_table_comparison",
+    "unsupported_deployment_claim",
+    "dataset_mismatch",
+    "set_operation_mismatch",
+    "future_universal_claim",
+    "supported_method_definition_control",
+    "source_internal_conflict",
+    "complexity_order",
+    "interval_level",
+    "unfalsifiable_future_scope",
+    "metric_target_definition"
+  ]
+}

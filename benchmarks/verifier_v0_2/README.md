@@ -8,6 +8,9 @@
 - [gold-rubric.md](gold-rubric.md)：支持、反驳、证据不足的标注准则。
 - [promotion-gate.md](promotion-gate.md)：语料资格、指标和发布门槛。
 - [fixture.schema.json](fixture.schema.json)：合并后的封存评测报告 Schema。
+- [contradiction-boundary-v1.json](contradiction-boundary-v1.json)：从已开封 Round 2 开发集中冻结的 contradiction 边界样例。
+- [contradiction-boundary-v1-adjudication.json](contradiction-boundary-v1-adjudication.json)：边界样例的模型复核与开发集仲裁记录。
+- [contradiction-boundary-v1-report.md](contradiction-boundary-v1-report.md)：实验结果、限制和后续动作。
 
 生成 Schema：
 

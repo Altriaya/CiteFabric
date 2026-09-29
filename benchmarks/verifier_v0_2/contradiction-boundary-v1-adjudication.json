@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "kind": "opened-development-boundary-adjudication",
+  "date": "2026-09-29",
+  "promotion_eligible": false,
+  "independence_verified": false,
+  "fixture": "benchmarks/verifier_v0_2/contradiction-boundary-v1.json",
+  "frozen_rubric_sha256": "sha256:3d5818f6891176fe068b0682bde6a2ec00e900c6455a099a3d3884a03e7cbbc7",
+  "primary_run": {
+    "provider": "quickrouter",
+    "model": "gpt-5.5-2026-04-23",
+    "prompt_hash": "sha256:752eb60a8299a556431cd598f88a5b7e17af46cc124c19ee8bc3b1280dec591e",
+    "completed": 12,
+    "source_gold_matches": 9
+  },
+  "dispute_review": {
+    "provider": "quickrouter",
+    "second_model": "gpt-5.4-2026-03-05",
+    "completed": 3,
+    "agreed_with_primary": 3,
+    "transport_retries": 1,
+    "cross_family_attempt": "claude-sonnet-4-6",
+    "cross_family_result": "provider_unavailable",
+    "cross_family_completed": 0
+  },
+  "adjudications": [
+    {
+      "case_id": "Q05",
+      "source_gold": "contradicted",
+      "adjudicated_gold": "insufficient_evidence",
+      "reason": "The frozen excerpts identify Table 2 and mention only some datasets; the per-dataset MAE_C cells needed to establish or refute every-dataset reduction are absent."
+    },
+    {
+      "case_id": "Q09",
+      "source_gold": "contradicted",
+      "adjudicated_gold": "insufficient_evidence",
+      "reason": "The frozen excerpts do not provide an exhaustive TDBA dataset list or an explicit exclusion of ETTm1."
+    },
+    {
+      "case_id": "Q35",
+      "source_gold": "contradicted",
+      "adjudicated_gold": "insufficient_evidence",
+      "reason": "The excerpts define pLDDT as structural-confidence evidence but do not make that definition exhaustive or explicitly exclude biological-function measurement."
+    }
+  ],
+  "source_benchmark_mutated": false,
+  "decision": "Use adjudicated labels only for opened-development analysis; preserve original Round 2 labels and require independent annotation for promotion data."
+}
