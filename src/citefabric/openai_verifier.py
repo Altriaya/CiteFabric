@@ -201,6 +201,61 @@ def _usage(
     )
 
 
+def _invalid_output_diagnostic(
+    response: httpx.Response,
+    *,
+    payload: dict[str, Any] | None = None,
+    output_text: str | None = None,
+    stage: str,
+    error: Exception | None = None,
+) -> dict[str, Any]:
+    """Describe invalid provider output without retaining its content."""
+    diagnostic: dict[str, Any] = {
+        "diagnostic_version": "invalid-verifier-output-v1",
+        "failure_stage": stage,
+        "provider_response_hash": sha(response.content),
+        "provider_response_bytes": len(response.content),
+    }
+    if payload is not None:
+        if payload.get("id"):
+            diagnostic["provider_response_id_hash"] = sha(str(payload["id"]).encode())
+        if payload.get("model"):
+            diagnostic["model_revision"] = str(payload["model"])
+        choices = payload.get("choices")
+        if isinstance(choices, list) and choices and isinstance(choices[0], dict):
+            finish_reason = choices[0].get("finish_reason")
+            if finish_reason is not None:
+                diagnostic["finish_reason"] = str(finish_reason)
+        raw_usage = payload.get("usage")
+        if isinstance(raw_usage, dict):
+            diagnostic["reported_usage"] = {
+                key: int(raw_usage[key])
+                for key in ("input_tokens", "output_tokens", "prompt_tokens", "completion_tokens")
+                if isinstance(raw_usage.get(key), int)
+            }
+    if output_text is not None:
+        diagnostic["rejected_output_hash"] = sha(output_text.encode())
+        diagnostic["rejected_output_chars"] = len(output_text)
+    if isinstance(error, json.JSONDecodeError):
+        diagnostic["validation_errors"] = [
+            {"type": "json_invalid", "line": error.lineno, "column": error.colno}
+        ]
+    elif isinstance(error, ValidationError):
+        diagnostic["validation_errors"] = [
+            {
+                "type": item["type"],
+                "path": [str(part) for part in item["loc"]],
+                "message": str(item["msg"])[:300],
+            }
+            for item in error.errors(include_url=False, include_context=False, include_input=False)[
+                :16
+            ]
+        ]
+    elif error is not None:
+        diagnostic["validation_errors"] = [{"type": type(error).__name__}]
+    return diagnostic
+
+
 class OpenAIVerifierBackend:
     """Strict verifier over an explicitly selected OpenAI-style endpoint."""
 
@@ -334,12 +389,25 @@ class OpenAIVerifierBackend:
         try:
             payload = response.json()
             if not isinstance(payload, dict):
-                raise ValueError
+                raise ValueError("provider response is not an object")
+        except (json.JSONDecodeError, TypeError, ValueError) as exc:
+            raise FabricError(
+                "invalid_model_output",
+                "The verifier provider returned invalid structured output.",
+                diagnostic=_invalid_output_diagnostic(response, stage="response_json", error=exc),
+            ) from exc
+        try:
             output_text = (
                 _chat_output_text(payload)
                 if self.api_style == "chat_completions"
                 else _responses_output_text(payload)
             )
+        except FabricError as exc:
+            exc.diagnostic = _invalid_output_diagnostic(
+                response, payload=payload, stage="output_extraction", error=exc
+            )
+            raise
+        try:
             parsed = VerifierResponse.model_validate_json(output_text)
             usage, pricing_version = _usage(
                 payload,
@@ -348,7 +416,15 @@ class OpenAIVerifierBackend:
             )
         except (json.JSONDecodeError, ValidationError, TypeError, ValueError) as exc:
             raise FabricError(
-                "invalid_model_output", "The verifier provider returned invalid structured output."
+                "invalid_model_output",
+                "The verifier provider returned invalid structured output.",
+                diagnostic=_invalid_output_diagnostic(
+                    response,
+                    payload=payload,
+                    output_text=output_text,
+                    stage="schema_validation",
+                    error=exc,
+                ),
             ) from exc
         return VerifierBackendResult(
             response=parsed,

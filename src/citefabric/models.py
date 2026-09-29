@@ -370,9 +370,17 @@ def aggregate(outcomes: list[Outcome], has_data: bool) -> ResultStatus:
 
 
 class FabricError(Exception):
-    def __init__(self, code: str, message: str, *, retryable: bool = False):
+    def __init__(
+        self,
+        code: str,
+        message: str,
+        *,
+        retryable: bool = False,
+        diagnostic: dict[str, Any] | None = None,
+    ):
         super().__init__(message)
         self.code, self.message, self.retryable = code, message, retryable
+        self.diagnostic = diagnostic or {}
 
     def result(self, item_id: str | None = None) -> Result:
         return Result(

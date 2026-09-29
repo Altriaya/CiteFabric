@@ -971,6 +971,7 @@ class CiteFabricClient:
 
             backend_result = None
             verifier_request = None
+            failure_diagnostic: dict[str, Any] = {}
             elapsed_ms = 0
             if failure_code is None:
                 assert self.verifier_backend is not None
@@ -1014,6 +1015,8 @@ class CiteFabricClient:
                         exc.code if isinstance(exc, FabricError) else "invalid_model_output"
                     )
                     retryable = exc.retryable if isinstance(exc, FabricError) else False
+                    if isinstance(exc, FabricError):
+                        failure_diagnostic = exc.diagnostic
                 except Exception:
                     failure_code, retryable = "verifier_failed", True
                 elapsed_ms = int((time.monotonic() - started) * 1000)
@@ -1038,6 +1041,11 @@ class CiteFabricClient:
                     policy_version="abstain-on-verifier-failure-v1",
                     elapsed_ms=elapsed_ms,
                 )
+                if verifier_request is not None:
+                    failure_verifier["input_hash"] = sha(
+                        dump(verifier_request.model_dump(mode="json")).encode()
+                    )
+                failure_verifier.update(failure_diagnostic)
                 if backend_result is not None and verifier_request is not None:
                     failure_verifier.update(
                         provider=backend_result.provider,

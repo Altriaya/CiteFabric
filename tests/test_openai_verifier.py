@@ -278,6 +278,55 @@ async def test_openai_compatible_uses_chat_json_schema_without_price_assumption(
     }
 
 
+async def test_invalid_compatible_output_records_only_redacted_diagnostics(tmp_path):
+    rejected = '{"judgments":[{"atom_id":"atom:1","assessment":{"coverage":"bad"}}]}'
+
+    def invalid_response(request):
+        return httpx.Response(
+            200,
+            json={
+                "id": "secret-provider-response-id",
+                "model": "gpt-5.6-sol",
+                "choices": [
+                    {
+                        "finish_reason": "stop",
+                        "message": {"role": "assistant", "content": rejected},
+                    }
+                ],
+                "usage": {"prompt_tokens": 123, "completion_tokens": 45},
+            },
+        )
+
+    config = Config(
+        data_dir=tmp_path / "workspace",
+        offline=True,
+        verifier_provider="openai_compatible",
+        verifier_base_url="https://router.example/v1",
+        verifier_model="gpt-5.6-sol",
+        compatible_api_key="compatible-key",
+    )
+    async with httpx.AsyncClient(transport=httpx.MockTransport(invalid_response)) as http:
+        async with CiteFabricClient(config, verifier_http_client=http) as client:
+            selector, evidence = await imported_evidence(client, tmp_path)
+            result = await client.verify_claim(
+                "The system reports 42% accuracy.",
+                selector,
+                evidence_ids=[evidence["evidence_id"]],
+            )
+
+    verifier = result.data["receipts"][0]["assessment"]["verifier"]
+    serialized = result.model_dump_json()
+    assert verifier["failure_stage"] == "schema_validation"
+    assert verifier["rejected_output_hash"].startswith("sha256:")
+    assert verifier["rejected_output_chars"] == len(rejected)
+    assert verifier["provider_response_id_hash"].startswith("sha256:")
+    assert verifier["reported_usage"] == {"prompt_tokens": 123, "completion_tokens": 45}
+    assert verifier["validation_errors"]
+    assert rejected not in serialized
+    assert "secret-provider-response-id" not in serialized
+    assert "compatible-key" not in serialized
+
+
 @pytest.mark.parametrize(
     ("status_code", "reason_code", "retryable"),
     [
