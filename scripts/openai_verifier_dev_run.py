@@ -1,7 +1,7 @@
 """Run a bounded GPT-5.5 verifier pilot over frozen opened-development evidence.
 
-Gold labels are read only after each CiteFabric verification call. This runner is
-for prompt and integration debugging; its results are never promotion eligible.
+Gold labels are applied only after all CiteFabric verification calls finish. This
+runner is for prompt and integration debugging; its results are never promotion eligible.
 """
 
 from __future__ import annotations
@@ -134,19 +134,15 @@ async def run(args) -> None:
             raise SystemExit(
                 "No OpenAI API key configured. Set CITEFABRIC_OPENAI_API_KEY or OPENAI_API_KEY."
             )
-        gold = {case["id"]: case["expected_verdict"] for case in cases}
         results = []
         requests_made = 0
         async with CiteFabricClient(config) as client:
             for item in frozen:
-                expected = EXPECTED_TO_PUBLIC[gold[item["case_id"]]]
                 if item["evidence_status"] != "available":
                     results.append(
                         {
                             "case_id": item["case_id"],
-                            "expected_verdict": expected,
                             "actual_verdict": "unavailable",
-                            "correct": False,
                             "result_status": "not_run_no_evidence",
                             "outcomes": [],
                             "receipt": None,
@@ -166,14 +162,17 @@ async def run(args) -> None:
                 results.append(
                     {
                         "case_id": item["case_id"],
-                        "expected_verdict": expected,
                         "actual_verdict": actual,
-                        "correct": actual == expected,
                         "result_status": verified.status,
                         "outcomes": [value.model_dump(mode="json") for value in verified.outcomes],
                         "receipt": receipt,
                     }
                 )
+        gold = {case["id"]: case["expected_verdict"] for case in cases}
+        for item in results:
+            expected = EXPECTED_TO_PUBLIC[gold[item["case_id"]]]
+            item["expected_verdict"] = expected
+            item["correct"] = item["actual_verdict"] == expected
         completed = [item for item in results if item["actual_verdict"] != "unavailable"]
         correct = sum(item["correct"] for item in completed)
         costs = [
