@@ -172,6 +172,37 @@ async def test_openai_http_errors_abstain_with_specific_codes(
             assert result.errors[-1].retryable is retryable
 
 
+async def test_openai_exhausted_credit_is_not_reported_as_transient_rate_limit(tmp_path):
+    transport = httpx.MockTransport(
+        lambda request: httpx.Response(
+            429,
+            json={
+                "error": {
+                    "type": "insufficient_quota",
+                    "code": "credit_balance_exhausted",
+                }
+            },
+        )
+    )
+    config = Config(
+        data_dir=tmp_path / "workspace",
+        offline=True,
+        verifier_provider="openai",
+        openai_api_key="test-key",
+    )
+    async with httpx.AsyncClient(transport=transport) as http:
+        async with CiteFabricClient(config, verifier_http_client=http) as client:
+            selector, evidence = await imported_evidence(client, tmp_path)
+            result = await client.verify_claim(
+                "The system reports 42% accuracy.",
+                selector,
+                evidence_ids=[evidence["evidence_id"]],
+            )
+
+    assert result.data["receipts"][0]["assessment"]["reason_code"] == ("verifier_quota_exhausted")
+    assert result.errors[-1].retryable is False
+
+
 async def test_openai_provider_without_key_abstains_before_network(tmp_path):
     def unexpected_request(request):
         raise AssertionError("network must not be called without a key")

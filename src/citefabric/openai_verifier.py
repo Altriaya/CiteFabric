@@ -104,6 +104,22 @@ def _output_text(payload: dict[str, Any]) -> str:
     return "".join(texts)
 
 
+def _api_error_fields(response: httpx.Response) -> tuple[str | None, str | None]:
+    try:
+        payload = response.json()
+    except json.JSONDecodeError:
+        return None, None
+    error = payload.get("error") if isinstance(payload, dict) else None
+    if not isinstance(error, dict):
+        return None, None
+    error_type = error.get("type")
+    error_code = error.get("code")
+    return (
+        str(error_type) if error_type is not None else None,
+        str(error_code) if error_code is not None else None,
+    )
+
+
 def _usage(payload: dict[str, Any], requested_model: str) -> tuple[VerifierUsage, str | None]:
     raw_value = payload.get("usage")
     raw: dict[str, Any] = raw_value if isinstance(raw_value, dict) else {}
@@ -214,6 +230,15 @@ class OpenAIVerifierBackend:
                 "verifier_authentication_failed", "The OpenAI verifier rejected its credentials."
             )
         if response.status_code == 429:
+            error_type, error_code = _api_error_fields(response)
+            if error_type == "insufficient_quota" or error_code in {
+                "insufficient_quota",
+                "credit_balance_exhausted",
+            }:
+                raise FabricError(
+                    "verifier_quota_exhausted",
+                    "The OpenAI verifier account has no available API credit.",
+                )
             raise FabricError(
                 "verifier_rate_limited", "The OpenAI verifier is rate limited.", retryable=True
             )
