@@ -67,6 +67,25 @@ def test_offline_structured_v6_routes_only_explicit_material_queries():
     assert material["front_matter_tiebreak"] is False
 
 
+def test_offline_structured_v6_does_not_route_on_a_year_alone():
+    year = offline_structured_plan(
+        "How stable was the ring during 2017?",
+        material_channels=True,
+        safe_material_routing=True,
+    )
+    quantitative = offline_structured_plan(
+        "As of March 28 2016 about",
+        material_channels=True,
+        safe_material_routing=True,
+    )
+
+    assert year["numeric_terms"] == ["2017"]
+    assert year["quantitative_terms"] == []
+    assert year["material_signal"] is False
+    assert quantitative["quantitative_terms"] == ["28"]
+    assert quantitative["material_signal"] is True
+
+
 async def test_offline_structured_v6_preserves_v2_for_ordinary_queries(config, tmp_path):
     path = tmp_path / "ordinary.txt"
     path.write_text(

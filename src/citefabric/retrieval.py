@@ -267,6 +267,11 @@ def offline_structured_plan(
         reference_terms = [
             {"kind": kind, "number": number} for kind, number in dict.fromkeys(references)
         ]
+    quantitative_terms = [
+        term
+        for term in numeric_terms
+        if not (term.isdigit() and len(term) == 4 and 1800 <= int(term) <= 2199)
+    ]
     joint_requested = material_channels and (
         any(marker in normalized for marker in _MATERIAL_CONDITION_MARKERS)
         or bool(
@@ -276,7 +281,7 @@ def offline_structured_plan(
             )
         )
     )
-    material_signal = bool(numeric_terms or reference_terms or joint_requested)
+    material_signal = bool(quantitative_terms or reference_terms or joint_requested)
     channels: list[dict[str, Any]] = [
         {"id": "original", "query": normalized, "limit": 32, "role": "native_language"}
     ]
@@ -341,6 +346,7 @@ def offline_structured_plan(
             "entity_terms": entity_terms,
             "numeric_terms": numeric_terms,
             "numeric_aliases": numeric_aliases,
+            "quantitative_terms": quantitative_terms,
             "reference_terms": reference_terms,
             "material_channels": material_channels,
             "material_signal": material_signal,
