@@ -1,0 +1,343 @@
+{
+  "$defs": {
+    "EvaluationCase": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Case Id",
+          "type": "string"
+        },
+        "paper_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Paper Id",
+          "type": "string"
+        },
+        "claim_language": {
+          "enum": [
+            "zh",
+            "en",
+            "multilingual",
+            "other"
+          ],
+          "title": "Claim Language",
+          "type": "string"
+        },
+        "risk_tags": {
+          "items": {
+            "enum": [
+              "numeric",
+              "unit",
+              "dataset",
+              "model",
+              "population",
+              "scope",
+              "time",
+              "comparison",
+              "negation",
+              "table",
+              "cross_language",
+              "compound_claim",
+              "absence"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Risk Tags",
+          "type": "array"
+        },
+        "reference_verdict": {
+          "enum": [
+            "supported",
+            "contradicted",
+            "insufficient_evidence"
+          ],
+          "title": "Reference Verdict",
+          "type": "string"
+        },
+        "predicted_verdict": {
+          "enum": [
+            "supported",
+            "contradicted",
+            "insufficient_evidence",
+            "unavailable"
+          ],
+          "title": "Predicted Verdict",
+          "type": "string"
+        },
+        "citations_valid": {
+          "title": "Citations Valid",
+          "type": "boolean"
+        },
+        "grounding_verified": {
+          "title": "Grounding Verified",
+          "type": "boolean"
+        },
+        "receipt_present": {
+          "title": "Receipt Present",
+          "type": "boolean"
+        },
+        "receipt_replayed": {
+          "title": "Receipt Replayed",
+          "type": "boolean"
+        },
+        "latency_ms": {
+          "minimum": 0,
+          "title": "Latency Ms",
+          "type": "integer"
+        },
+        "cost_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cost Usd"
+        }
+      },
+      "required": [
+        "case_id",
+        "paper_id",
+        "claim_language",
+        "risk_tags",
+        "reference_verdict",
+        "predicted_verdict",
+        "citations_valid",
+        "grounding_verified",
+        "receipt_present",
+        "receipt_replayed",
+        "latency_ms"
+      ],
+      "title": "EvaluationCase",
+      "type": "object"
+    },
+    "EvaluationPaper": {
+      "additionalProperties": false,
+      "properties": {
+        "paper_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Paper Id",
+          "type": "string"
+        },
+        "domain": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Domain",
+          "type": "string"
+        },
+        "document_language": {
+          "enum": [
+            "zh",
+            "en",
+            "multilingual",
+            "other"
+          ],
+          "title": "Document Language",
+          "type": "string"
+        },
+        "source_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Source Hash",
+          "type": "string"
+        },
+        "extraction_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Extraction Hash",
+          "type": "string"
+        },
+        "development_overlap": {
+          "default": false,
+          "title": "Development Overlap",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "paper_id",
+        "domain",
+        "document_language",
+        "source_hash",
+        "extraction_hash"
+      ],
+      "title": "EvaluationPaper",
+      "type": "object"
+    },
+    "GateThresholds": {
+      "additionalProperties": false,
+      "properties": {
+        "minimum_papers": {
+          "default": 12,
+          "minimum": 1,
+          "title": "Minimum Papers",
+          "type": "integer"
+        },
+        "minimum_cases": {
+          "default": 100,
+          "minimum": 1,
+          "title": "Minimum Cases",
+          "type": "integer"
+        },
+        "minimum_cases_per_label": {
+          "default": 20,
+          "minimum": 1,
+          "title": "Minimum Cases Per Label",
+          "type": "integer"
+        },
+        "minimum_cases_per_paper": {
+          "default": 5,
+          "minimum": 1,
+          "title": "Minimum Cases Per Paper",
+          "type": "integer"
+        },
+        "minimum_domains": {
+          "default": 4,
+          "minimum": 1,
+          "title": "Minimum Domains",
+          "type": "integer"
+        },
+        "macro_f1_min": {
+          "default": 0.85,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Macro F1 Min",
+          "type": "number"
+        },
+        "false_support_rate_max": {
+          "default": 0.02,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "False Support Rate Max",
+          "type": "number"
+        },
+        "insufficient_recall_min": {
+          "default": 0.9,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Insufficient Recall Min",
+          "type": "number"
+        },
+        "minimum_paper_accuracy": {
+          "default": 0.7,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Minimum Paper Accuracy",
+          "type": "number"
+        },
+        "unavailable_rate_max": {
+          "default": 0.02,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Unavailable Rate Max",
+          "type": "number"
+        },
+        "p95_latency_ms_max": {
+          "default": 30000,
+          "minimum": 1,
+          "title": "P95 Latency Ms Max",
+          "type": "integer"
+        },
+        "mean_cost_usd_max": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mean Cost Usd Max"
+        }
+      },
+      "title": "GateThresholds",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "protocol_version": {
+      "const": "verifier-promotion-v1",
+      "default": "verifier-promotion-v1",
+      "title": "Protocol Version",
+      "type": "string"
+    },
+    "benchmark_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Benchmark Id",
+      "type": "string"
+    },
+    "sealed_before_run": {
+      "title": "Sealed Before Run",
+      "type": "boolean"
+    },
+    "independence_verified": {
+      "title": "Independence Verified",
+      "type": "boolean"
+    },
+    "double_annotated": {
+      "title": "Double Annotated",
+      "type": "boolean"
+    },
+    "adjudicated": {
+      "title": "Adjudicated",
+      "type": "boolean"
+    },
+    "retrieval_frozen": {
+      "title": "Retrieval Frozen",
+      "type": "boolean"
+    },
+    "verifier_code_frozen": {
+      "title": "Verifier Code Frozen",
+      "type": "boolean"
+    },
+    "model_frozen": {
+      "title": "Model Frozen",
+      "type": "boolean"
+    },
+    "prompt_frozen": {
+      "title": "Prompt Frozen",
+      "type": "boolean"
+    },
+    "thresholds": {
+      "$ref": "#/$defs/GateThresholds"
+    },
+    "papers": {
+      "items": {
+        "$ref": "#/$defs/EvaluationPaper"
+      },
+      "title": "Papers",
+      "type": "array"
+    },
+    "cases": {
+      "items": {
+        "$ref": "#/$defs/EvaluationCase"
+      },
+      "title": "Cases",
+      "type": "array"
+    }
+  },
+  "required": [
+    "benchmark_id",
+    "sealed_before_run",
+    "independence_verified",
+    "double_annotated",
+    "adjudicated",
+    "retrieval_frozen",
+    "verifier_code_frozen",
+    "model_frozen",
+    "prompt_frozen",
+    "papers",
+    "cases"
+  ],
+  "title": "PromotionEvaluation",
+  "type": "object"
+}

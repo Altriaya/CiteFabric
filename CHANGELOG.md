@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Freeze the candidate 0.2 verifier request/response and provenance contracts, exact atomic-claim spans, evidence allowlist checks, deterministic composite verdict policy, and an executable sealed-holdout promotion gate. The model backend remains unconfigured.
 - Add the experimental `SemanticAssessment` three-axis contract, conservative deterministic verdict policy, strict evidence allowlist/budget validation, public schema and an opened-development evaluation runner. Production `verify_claim` continues to abstain without a configured backend.
 - Add opt-in `structured_v3` retrieval: versioned text-region indexes, literal/reference matching, scope and cost context, compact spans and explicit table-reference dependencies. Default remains v2.
 - Add atomic schema 1→2 migration with a consistent pre-upgrade backup; derived index failures fall back explicitly to v2.
@@ -14,7 +15,7 @@
 - Return the existing extraction ID and coverage on repeated document imports.
 - Extend local regression experiments to six papers and 38 bilingual cases, with ablations and SDK/MCP parity checks including empty results.
 
-## 0.1.0 — local implementation, not published
+## 0.1.0 — GitHub release
 
 - Four-source discovery with explicit failures, bounded retry, shared provider leases and cached observation timestamps.
 - Stable local paper/edition IDs, conservative identifier deduplication, quarantined conflicts and immutable metadata snapshots.

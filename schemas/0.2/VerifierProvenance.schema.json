@@ -1,0 +1,126 @@
+{
+  "$defs": {
+    "VerifierUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "cost_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cost Usd"
+        },
+        "input_tokens": {
+          "minimum": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "output_tokens": {
+          "minimum": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "input_tokens",
+        "output_tokens"
+      ],
+      "title": "VerifierUsage",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Runtime fields that must be copied into the eventual EvidenceReceipt.",
+  "properties": {
+    "attempts": {
+      "maximum": 3,
+      "minimum": 1,
+      "title": "Attempts",
+      "type": "integer"
+    },
+    "elapsed_ms": {
+      "minimum": 0,
+      "title": "Elapsed Ms",
+      "type": "integer"
+    },
+    "fallback_used": {
+      "default": false,
+      "title": "Fallback Used",
+      "type": "boolean"
+    },
+    "input_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Input Hash",
+      "type": "string"
+    },
+    "model": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Model",
+      "type": "string"
+    },
+    "model_revision": {
+      "anyOf": [
+        {
+          "maxLength": 200,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Revision"
+    },
+    "output_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Output Hash",
+      "type": "string"
+    },
+    "policy_version": {
+      "const": "conservative-three-way-v1",
+      "default": "conservative-three-way-v1",
+      "title": "Policy Version",
+      "type": "string"
+    },
+    "prompt_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Prompt Hash",
+      "type": "string"
+    },
+    "prompt_version": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Prompt Version",
+      "type": "string"
+    },
+    "provider": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Provider",
+      "type": "string"
+    },
+    "usage": {
+      "$ref": "#/$defs/VerifierUsage"
+    }
+  },
+  "required": [
+    "provider",
+    "model",
+    "prompt_version",
+    "prompt_hash",
+    "input_hash",
+    "output_hash",
+    "elapsed_ms",
+    "attempts",
+    "usage"
+  ],
+  "title": "VerifierProvenance",
+  "type": "object"
+}

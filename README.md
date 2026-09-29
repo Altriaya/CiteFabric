@@ -4,7 +4,7 @@
 
 CiteFabric 提供多源论文搜索、版本身份、可重放文本证据和引用溯源，支持 Python SDK、CLI 和五个 MCP 工具。
 
-**当前状态：可运行的 0.1 实现，尚未发布到 PyPI。** 本版本没有语义论断验证器，相关段落不等于支持论断。
+**当前状态：已发布 GitHub v0.1.0，尚未发布到 PyPI。** 本版本没有语义论断验证器，相关段落不等于支持论断。
 
 ## 从源码运行
 
@@ -181,4 +181,4 @@ uv build
 
 离线测试包含真实 stdio MCP 子进程和 PDF 解析进程。macOS、Windows、Linux 与 Python 3.11/3.13 的远程矩阵及公网 arXiv 黄金路径均已通过，范围和证据见 [0.1 发布验收](docs/release-readiness-0.1.md)。
 
-[架构](docs/architecture.md) · [契约](docs/contracts.md) · [验收计划](docs/delivery.md) · [JSON Schema](schemas/0.1) · [贡献指南](CONTRIBUTING.md) · [Apache-2.0 许可](LICENSE)
+[架构](docs/architecture.md) · [契约](docs/contracts.md) · [0.2 verifier 设计](docs/verifier-0.2-design.md) · [Verifier 评测协议](benchmarks/verifier_v0_2) · [0.1 Schema](schemas/0.1) · [0.2 Schema](schemas/0.2) · [贡献指南](CONTRIBUTING.md) · [Apache-2.0 许可](LICENSE)

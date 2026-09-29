@@ -1,0 +1,330 @@
+{
+  "$defs": {
+    "AtomicClaim": {
+      "additionalProperties": false,
+      "description": "One independently assessable assertion copied from the original claim.",
+      "properties": {
+        "atom_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Atom Id",
+          "type": "string"
+        },
+        "char_end": {
+          "exclusiveMinimum": 0,
+          "title": "Char End",
+          "type": "integer"
+        },
+        "char_start": {
+          "minimum": 0,
+          "title": "Char Start",
+          "type": "integer"
+        },
+        "material_conditions": {
+          "items": {
+            "enum": [
+              "subject",
+              "dataset",
+              "population",
+              "model",
+              "method",
+              "version",
+              "metric",
+              "value",
+              "unit",
+              "direction",
+              "baseline",
+              "time",
+              "scope",
+              "causality",
+              "other"
+            ],
+            "type": "string"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "title": "Material Conditions",
+          "type": "array"
+        },
+        "text": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "atom_id",
+        "text",
+        "char_start",
+        "char_end",
+        "material_conditions"
+      ],
+      "title": "AtomicClaim",
+      "type": "object"
+    },
+    "Locator": {
+      "additionalProperties": false,
+      "properties": {
+        "bbox": {
+          "anyOf": [
+            {
+              "maxItems": 4,
+              "minItems": 4,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bbox"
+        },
+        "cell": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "integer"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cell"
+        },
+        "char_end": {
+          "exclusiveMinimum": 0,
+          "title": "Char End",
+          "type": "integer"
+        },
+        "char_start": {
+          "minimum": 0,
+          "title": "Char Start",
+          "type": "integer"
+        },
+        "kind": {
+          "enum": [
+            "pdf_text",
+            "plain_text",
+            "abstract"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "page_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page Label"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section"
+        },
+        "table_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Table Id"
+        },
+        "text_unit_id": {
+          "title": "Text Unit Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "text_unit_id",
+        "char_start",
+        "char_end"
+      ],
+      "title": "Locator",
+      "type": "object"
+    },
+    "VerifierEvidence": {
+      "additionalProperties": false,
+      "description": "Bounded, grounded excerpt sent to a verifier backend as untrusted data.",
+      "properties": {
+        "document_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Document Id",
+          "type": "string"
+        },
+        "edition_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Edition Id",
+          "type": "string"
+        },
+        "evidence_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "excerpt": {
+          "maxLength": 6000,
+          "minLength": 1,
+          "title": "Excerpt",
+          "type": "string"
+        },
+        "excerpt_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Excerpt Hash",
+          "type": "string"
+        },
+        "locator": {
+          "$ref": "#/$defs/Locator"
+        },
+        "source_hash": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Source Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "edition_id",
+        "document_id",
+        "source_hash",
+        "excerpt",
+        "excerpt_hash",
+        "locator"
+      ],
+      "title": "VerifierEvidence",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Complete model-visible payload for one claim and one paper edition.",
+  "properties": {
+    "atoms": {
+      "items": {
+        "$ref": "#/$defs/AtomicClaim"
+      },
+      "maxItems": 8,
+      "minItems": 1,
+      "title": "Atoms",
+      "type": "array"
+    },
+    "claim_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Claim Id",
+      "type": "string"
+    },
+    "claim_text": {
+      "maxLength": 10000,
+      "minLength": 1,
+      "title": "Claim Text",
+      "type": "string"
+    },
+    "context": {
+      "anyOf": [
+        {
+          "maxLength": 10000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Context"
+    },
+    "contract_version": {
+      "const": "verifier-contract-v1",
+      "default": "verifier-contract-v1",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "edition_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Edition Id",
+      "type": "string"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/VerifierEvidence"
+      },
+      "maxItems": 6,
+      "minItems": 1,
+      "title": "Evidence",
+      "type": "array"
+    },
+    "evidence_char_budget": {
+      "default": 6000,
+      "maximum": 6000,
+      "minimum": 1,
+      "title": "Evidence Char Budget",
+      "type": "integer"
+    },
+    "policy_version": {
+      "const": "conservative-three-way-v1",
+      "default": "conservative-three-way-v1",
+      "title": "Policy Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "claim_id",
+    "claim_text",
+    "edition_id",
+    "atoms",
+    "evidence"
+  ],
+  "title": "VerifierRequest",
+  "type": "object"
+}
