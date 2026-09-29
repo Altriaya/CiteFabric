@@ -51,6 +51,7 @@ from .retrieval import (
     quality_flags,
     query_plan,
     with_context,
+    with_material_context,
 )
 from .runtime import ProviderRuntime
 from .storage import Store, dump
@@ -714,8 +715,12 @@ class CiteFabricClient:
                     "requested_policy": "structured_v3",
                     "fallback_reason": getattr(exc, "code", "structure_index_timeout"),
                 }
-        if request.retrieval_policy == "offline_structured_v4":
-            plan = offline_structured_plan(effective_query, request.expand_query)
+        if request.retrieval_policy in {"offline_structured_v4", "offline_structured_v5"}:
+            plan = offline_structured_plan(
+                effective_query,
+                request.expand_query,
+                material_channels=request.retrieval_policy == "offline_structured_v5",
+            )
             plan["original"] = query
             plan["effective_query"] = effective_query
             rows, channel_trace = offline_structured_candidates(
@@ -743,11 +748,20 @@ class CiteFabricClient:
                 size += len(row["text"])
                 counts[row["edition_id"]] += 1
             if request.include_context:
-                selected_rows = with_context(self.store, selected_rows, request.max_chars)
-        if (
-            not structured_meta.get("structure_index_version")
-            and request.retrieval_policy != "offline_structured_v4"
-        ):
+                selected_rows = (
+                    with_material_context(self.store, selected_rows, request.max_chars)
+                    if request.retrieval_policy == "offline_structured_v5"
+                    and (
+                        plan["numeric_terms"]
+                        or plan["reference_terms"]
+                        or len(plan["mappings"]) >= 3
+                    )
+                    else with_context(self.store, selected_rows, request.max_chars)
+                )
+        if not structured_meta.get("structure_index_version") and request.retrieval_policy not in {
+            "offline_structured_v4",
+            "offline_structured_v5",
+        }:
             plan = query_plan(effective_query, request.expand_query)
             plan["original"] = query
             plan["effective_query"] = effective_query
@@ -846,6 +860,8 @@ class CiteFabricClient:
                 retrieval_version=(
                     "3"
                     if structured_meta.get("structure_index_version")
+                    else "5"
+                    if request.retrieval_policy == "offline_structured_v5"
                     else "4"
                     if request.retrieval_policy == "offline_structured_v4"
                     else "2"
@@ -853,6 +869,8 @@ class CiteFabricClient:
                 rerank_method=(
                     "region-conditions-v1"
                     if structured_meta.get("structure_index_version")
+                    else "material_channel_rrf-v2"
+                    if request.retrieval_policy == "offline_structured_v5"
                     else "bounded_channel_rrf-v1"
                     if request.retrieval_policy == "offline_structured_v4"
                     else "weighted_glossary_coverage-v1"

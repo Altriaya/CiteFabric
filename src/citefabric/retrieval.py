@@ -87,15 +87,45 @@ GLOSSARY = {
 }
 
 
+# Candidate v5 vocabulary is kept separate so replaying offline_structured_v4
+# continues to use its frozen query plan.  Antonym/set-operation pairs are
+# intentionally symmetric: a false claim often contains the opposite term from
+# the source passage, and retrieval must surface that passage for verification.
+MATERIAL_GLOSSARY = {
+    "双层": "bi-level bilevel",
+    "优化": "optimization",
+    "生成器": "generator",
+    "训练损失": "training loss",
+    "损失": "loss",
+    "退化": "degradation",
+    "信号稀释": "signal dilution",
+    "通道": "channel channels",
+    "注意力": "attention",
+    "骨架": "backbone",
+    "蛋白质": "protein",
+    "结构域": "domain domains",
+    "残基": "residue residues",
+    "样本": "sample samples",
+    "越大": "higher lower larger smaller",
+    "越小": "lower higher smaller larger",
+    "并集": "union intersect intersection",
+    "交集": "intersect intersection union",
+}
+
+
 def searchable_text(text: str) -> str:
     return unicodedata.normalize("NFKC", re.sub(r"-\s*\n\s*", "", text)).casefold()
 
 
-def query_plan(query: str, enabled: bool = True) -> dict[str, Any]:
+def query_plan(
+    query: str, enabled: bool = True, extra_glossary: dict[str, str] | None = None
+) -> dict[str, Any]:
     mappings = []
     normalized = unicodedata.normalize("NFKC", query)
     if enabled:
-        for phrase, english in GLOSSARY.items():
+        glossary = dict(GLOSSARY)
+        glossary.update(extra_glossary or {})
+        for phrase, english in glossary.items():
             if phrase in normalized:
                 mappings.append({"source": phrase, "terms": english.split()})
     aliases = []
@@ -127,15 +157,41 @@ _SCOPE_MARKERS = (
 )
 _TABLE_MARKERS = ("表格", "表中", "表 ")
 
+_SMALL_NUMBER_WORDS = {
+    "0": "zero",
+    "1": "one",
+    "2": "two",
+    "3": "three",
+    "4": "four",
+    "5": "five",
+    "6": "six",
+    "7": "seven",
+    "8": "eight",
+    "9": "nine",
+    "10": "ten",
+    "11": "eleven",
+    "12": "twelve",
+    "13": "thirteen",
+    "14": "fourteen",
+    "15": "fifteen",
+    "16": "sixteen",
+    "17": "seventeen",
+    "18": "eighteen",
+    "19": "nineteen",
+    "20": "twenty",
+}
 
-def offline_structured_plan(query: str, enabled: bool = True) -> dict[str, Any]:
+
+def offline_structured_plan(
+    query: str, enabled: bool = True, *, material_channels: bool = False
+) -> dict[str, Any]:
     """Plan bounded, separately ranked local lexical channels.
 
     This is deliberately a query planner, not a translator.  Chinese text stays
     in its own channel for locally imported Chinese papers; glossary terms and
     ASCII literals are searched separately so they cannot distort its rank.
     """
-    plan = query_plan(query, enabled)
+    plan = query_plan(query, enabled, MATERIAL_GLOSSARY if material_channels else None)
     normalized = unicodedata.normalize("NFKC", query)
     english_terms = list(dict.fromkeys(t for item in plan["mappings"] for t in item["terms"]))
     literals = re.findall(r"[A-Za-z][A-Za-z0-9_-]*", normalized)
@@ -158,6 +214,43 @@ def offline_structured_plan(query: str, enabled: bool = True) -> dict[str, Any]:
     table_requested = any(marker in normalized for marker in _TABLE_MARKERS) or bool(
         re.search(r"\btable\s*\d", lowered)
     )
+    numeric_terms: list[str] = []
+    numeric_aliases: dict[str, list[str]] = {}
+    reference_terms: list[dict[str, str]] = []
+    if material_channels:
+        # Commas in thousands separators are removed because PDF extraction and
+        # SQLite tokenization do not represent them consistently.  Single digit
+        # numbers are handled only as explicit Table/Figure references to avoid
+        # a large, noisy numeric channel.
+        numeric_source = normalized.replace(",", "")
+        numeric_terms = list(
+            dict.fromkeys(
+                token
+                for token in re.findall(r"(?<![\w.])\d+(?:\.\d+)?%?", numeric_source)
+                if "." in token or len(token.rstrip("%")) >= 2
+            )
+        )
+        numeric_aliases = {
+            term: [_SMALL_NUMBER_WORDS[term]]
+            for term in numeric_terms
+            if term in _SMALL_NUMBER_WORDS
+        }
+        references = [
+            *(("table", number) for number in re.findall(r"表\s*(\d+[A-Za-z]?)", normalized)),
+            *(("figure", number) for number in re.findall(r"图\s*(\d+[A-Za-z]?)", normalized)),
+            *(
+                (
+                    "table" if kind.casefold() == "table" else "figure",
+                    number,
+                )
+                for kind, number in re.findall(
+                    r"\b(table|fig(?:ure)?\.?)\s*(\d+[A-Za-z]?)", normalized, re.I
+                )
+            ),
+        ]
+        reference_terms = [
+            {"kind": kind, "number": number} for kind, number in dict.fromkeys(references)
+        ]
     channels: list[dict[str, Any]] = [
         {"id": "original", "query": normalized, "limit": 32, "role": "native_language"}
     ]
@@ -174,6 +267,28 @@ def offline_structured_plan(query: str, enabled: bool = True) -> dict[str, Any]:
         channels.append(
             {"id": "entity:" + term, "query": term, "limit": 12, "role": "exact_entity"}
         )
+    if numeric_terms:
+        numeric_query_terms = [
+            term for number in numeric_terms for term in [number, *numeric_aliases.get(number, [])]
+        ]
+        channels.append(
+            {
+                "id": "numeric_bundle",
+                "query": " ".join(numeric_query_terms),
+                "limit": 24,
+                "role": "exact_numeric",
+            }
+        )
+    for reference in reference_terms[:4]:
+        label = "table" if reference["kind"] == "table" else "fig figure"
+        channels.append(
+            {
+                "id": f"reference:{reference['kind']}:{reference['number']}",
+                "query": f"{label} {reference['number']}",
+                "limit": 16,
+                "role": "exact_reference",
+            }
+        )
     if table_requested:
         channels.append(
             {"id": "table_context", "query": "table results", "limit": 12, "role": "table_context"}
@@ -189,9 +304,17 @@ def offline_structured_plan(query: str, enabled: bool = True) -> dict[str, Any]:
         )
     plan.update(
         {
-            "method": "offline-structured-channels-v4",
+            "method": (
+                "offline-material-channels-v5"
+                if material_channels
+                else "offline-structured-channels-v4"
+            ),
             "channels": channels,
             "entity_terms": entity_terms,
+            "numeric_terms": numeric_terms,
+            "numeric_aliases": numeric_aliases,
+            "reference_terms": reference_terms,
+            "material_channels": material_channels,
             "scope_requested": scope_requested,
             "table_requested": table_requested,
             "semantic_translation": False,
@@ -239,12 +362,109 @@ def offline_structured_candidates(
             )
             else 0.0
         )
+        numeric_hits = sum(
+            any(
+                re.search(r"(?<![\w.])" + re.escape(form.casefold()) + r"(?![\w.])", text)
+                for form in [number, *plan.get("numeric_aliases", {}).get(number, [])]
+            )
+            for number in plan.get("numeric_terms", [])
+        )
+        reference_hits = sum(
+            bool(
+                re.search(
+                    (r"\btable\s*" if reference["kind"] == "table" else r"\b(?:fig(?:ure)?\.?)\s*")
+                    + re.escape(reference["number"].casefold())
+                    + r"\b",
+                    text,
+                )
+            )
+            for reference in plan.get("reference_terms", [])
+        )
+        reference_heading_hits = sum(
+            bool(
+                re.search(
+                    (r"\btable\s*" if reference["kind"] == "table" else r"\b(?:fig(?:ure)?\.?)\s*")
+                    + re.escape(reference["number"].casefold())
+                    + r"\b",
+                    text[:200],
+                )
+            )
+            for reference in plan.get("reference_terms", [])
+        )
+        mapping_coverage = (
+            concept_coverage(row["text"], plan) if plan.get("material_channels") else 0
+        )
+        page_match = re.fullmatch(r"page:(\d+)", row["unit_id"])
+        # Contribution summaries and abstracts are concentrated in front matter.
+        # Use this only as a bounded tie-breaker; exact entities, numbers, and
+        # explicit table/figure references still carry larger combined weight.
+        front_matter_bonus = (
+            0.04 / max(1, int(page_match.group(1)))
+            if plan.get("material_channels") and page_match
+            else 0.0
+        )
         rrf = sum(1 / (60 + rank) for rank in row["channels"].values())
-        row["rrf_score"] = rrf + 0.035 * entity_hits + table_bonus + scope_bonus
+        row["rrf_score"] = (
+            rrf
+            + 0.035 * entity_hits
+            + table_bonus
+            + scope_bonus
+            + 0.04 * numeric_hits
+            + 0.06 * reference_hits
+            + 0.08 * reference_heading_hits
+            + 0.10 * mapping_coverage
+            + front_matter_bonus
+        )
         # Existing response code represents better results with a lower BM25 score.
         row["score"] = -row["rrf_score"]
-        row["score_basis"] = "bounded_channel_rrf-v1; lexical only, not semantic confidence"
+        row["score_basis"] = (
+            "material_channel_rrf-v2; lexical only, not semantic confidence"
+            if plan.get("material_channels")
+            else "bounded_channel_rrf-v1; lexical only, not semantic confidence"
+        )
     return list(selected.values()), trace
+
+
+def with_material_context(store: Store, seeds: list[dict], max_chars: int) -> list[dict]:
+    """Pack complete top-ranked pages before lower-ranked passage fragments.
+
+    Material claims commonly join a table heading, row labels, values, and
+    qualifiers that span several passage windows.  The v5 policy spends the
+    bounded character budget on the best candidate's complete page when it
+    fits, then appends non-duplicate seed passages while capacity remains.
+    """
+    if not seeds:
+        return []
+    packed: list[dict[str, Any]] = []
+    used_groups: set[tuple[str, str]] = set()
+    used_chars = 0
+    for seed in seeds:
+        group = (seed["extraction_id"], seed["unit_id"])
+        if group in used_groups:
+            continue
+        candidate = dict(seed, seed_ids=[seed["id"]])
+        unit = next(
+            u
+            for u in store.extraction(seed["extraction_id"]).text_units
+            if u.text_unit_id == seed["unit_id"]
+        )
+        if not packed and unit.page is not None:
+            if len(unit.text) <= max_chars:
+                start, end = 0, len(unit.text)
+            else:
+                # Keep the best seed inside the widest possible same-page
+                # window.  Anchoring the window to a page edge avoids losing a
+                # heading or qualifier when the page barely exceeds budget.
+                start = min(seed["start"], len(unit.text) - max_chars)
+                end = start + max_chars
+            candidate = range_row(store, seed, start, end)
+            candidate["seed_ids"] = [seed["id"]]
+        if used_chars + len(candidate["text"]) > max_chars:
+            continue
+        packed.append(candidate)
+        used_groups.add(group)
+        used_chars += len(candidate["text"])
+    return packed
 
 
 def concept_coverage(text: str, plan: dict) -> float:

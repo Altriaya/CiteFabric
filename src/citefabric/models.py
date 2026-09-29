@@ -432,7 +432,9 @@ class EvidenceRequest(Model):
     allow_abstract: bool = False
     expand_query: bool = True
     include_context: bool = True
-    retrieval_policy: Literal["v2", "structured_v3", "offline_structured_v4"] = "v2"
+    retrieval_policy: Literal[
+        "v2", "structured_v3", "offline_structured_v4", "offline_structured_v5"
+    ] = "v2"
     query_rewrite: Literal["off", "english_faithful"] = "off"
 
 

@@ -16,6 +16,10 @@ ARMS = {
         "en": "offline_structured_v4",
         "zh": "offline_structured_v4",
     },
+    "offline_structured_v5": {
+        "en": "offline_structured_v5",
+        "zh": "offline_structured_v5",
+    },
     "language_route": {"en": "v2", "zh": "offline_structured_v4"},
 }
 

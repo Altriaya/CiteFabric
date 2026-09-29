@@ -23,6 +23,32 @@ def test_offline_structured_plan_does_not_infer_a_table_from_a_numeric_question(
     assert not any(channel["id"] == "table_context" for channel in plan["channels"])
 
 
+def test_offline_structured_v5_adds_material_channels_without_changing_v4():
+    query = "表 3 中 17.607 和 39.303 的训练损失是否来自交集样本？"
+    v4 = offline_structured_plan(query)
+    v5 = offline_structured_plan(query, material_channels=True)
+
+    assert not v4["material_channels"]
+    assert not any(channel["id"] == "numeric_bundle" for channel in v4["channels"])
+    assert not any(channel["id"].startswith("reference:") for channel in v4["channels"])
+    assert "union" not in v4["expanded"]
+
+    assert v5["method"] == "offline-material-channels-v5"
+    assert v5["numeric_terms"] == ["17.607", "39.303"]
+    assert v5["reference_terms"] == [{"kind": "table", "number": "3"}]
+    assert any(channel["id"] == "numeric_bundle" for channel in v5["channels"])
+    assert any(channel["id"] == "reference:table:3" for channel in v5["channels"])
+    assert "intersection" in v5["expanded"] and "union" in v5["expanded"]
+
+
+def test_offline_structured_v5_expands_small_number_words():
+    plan = offline_structured_plan("评估了 13 种防御", material_channels=True)
+    numeric = next(channel for channel in plan["channels"] if channel["id"] == "numeric_bundle")
+
+    assert plan["numeric_aliases"] == {"13": ["thirteen"]}
+    assert numeric["query"] == "13 thirteen"
+
+
 async def test_offline_structured_v4_uses_glossary_without_combining_chinese_fts(config, tmp_path):
     path = tmp_path / "study.txt"
     path.write_text(
@@ -49,7 +75,7 @@ async def test_offline_structured_v4_uses_glossary_without_combining_chinese_fts
     assert glossary["candidates"] >= 1
 
 
-@pytest.mark.parametrize("policy", ["v2", "offline_structured_v4"])
+@pytest.mark.parametrize("policy", ["v2", "offline_structured_v4", "offline_structured_v5"])
 async def test_offline_structured_policy_preserves_bounded_evidence(config, tmp_path, policy):
     path = tmp_path / "bounded.txt"
     path.write_text("Table 1: ModelRiver accuracy 97.8 percent. " + "context " * 200)

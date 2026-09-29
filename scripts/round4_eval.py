@@ -34,7 +34,7 @@ ROOT = Path(__file__).resolve().parents[1]
 # Candidates run beside the stable baseline.  A score report's existing paired
 # comparison remains v2↔v3; additional candidate arms are reported separately
 # until their reviewer packages are independently rated.
-POLICIES = ("v2", "structured_v3", "offline_structured_v4")
+POLICIES = ("v2", "structured_v3", "offline_structured_v4", "offline_structured_v5")
 LANGUAGES = ("en", "zh")
 SCHEMA = ROOT / "benchmarks/round4/fixture.schema.json"
 
