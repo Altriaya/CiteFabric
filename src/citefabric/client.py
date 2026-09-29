@@ -42,7 +42,16 @@ from .models import (
     sha,
 )
 from .providers import DiscoveryProvider
-from .retrieval import concept_coverage, quality_flags, query_plan, with_context
+from .query_rewrite import QueryRewriter, validate_faithful_rewrite
+from .query_rewrite import audit as rewrite_audit
+from .retrieval import (
+    concept_coverage,
+    offline_structured_candidates,
+    offline_structured_plan,
+    quality_flags,
+    query_plan,
+    with_context,
+)
 from .runtime import ProviderRuntime
 from .storage import Store, dump
 
@@ -93,11 +102,16 @@ class CiteFabricClient:
     """One local workspace. Use as an async context manager to close resources."""
 
     def __init__(
-        self, config: Config | None = None, *, http_client: httpx.AsyncClient | None = None
+        self,
+        config: Config | None = None,
+        *,
+        http_client: httpx.AsyncClient | None = None,
+        query_rewriter: QueryRewriter | None = None,
     ):
         self.config = config or Config.load()
         self.store = Store(self.config.data_dir, self.config.cache_bytes)
         self.runtime = ProviderRuntime(self.config, self.store, http_client)
+        self.query_rewriter = query_rewriter
         self.providers = {
             name: DiscoveryProvider(name, self.runtime)
             for name in ("crossref", "arxiv", "openalex", "semantic_scholar")
@@ -580,6 +594,44 @@ class CiteFabricClient:
         if not query.strip():
             raise FabricError("invalid_argument", "Query must not be blank.")
         outcomes, warnings, editions = [], [], []
+        effective_query = query
+        rewrite = None
+        if request.query_rewrite == "english_faithful":
+            if self.query_rewriter is None:
+                rewrite = rewrite_audit(
+                    requested=request.query_rewrite, original=query, status="not_configured"
+                )
+                warnings.append(
+                    "Faithful English query rewrite was requested but no approved rewriter is configured; "
+                    "the original query was used."
+                )
+            else:
+                candidate = await self.query_rewriter(query)
+                rejection_reasons = validate_faithful_rewrite(query, candidate.query)
+                if rejection_reasons:
+                    rewrite = rewrite_audit(
+                        requested=request.query_rewrite,
+                        original=query,
+                        rewrite=candidate,
+                        status="rejected",
+                        rejection_reasons=rejection_reasons,
+                    )
+                    warnings.append(
+                        "Faithful English query rewrite was rejected; the original query was used."
+                    )
+                else:
+                    effective_query = candidate.query
+                    rewrite = rewrite_audit(
+                        requested=request.query_rewrite,
+                        original=query,
+                        rewrite=candidate,
+                        status="applied",
+                    )
+        else:
+            rewrite = rewrite_audit(
+                requested=request.query_rewrite, original=query, status="not_requested"
+            )
+        retrieval_request = request.model_copy(update={"query": effective_query})
 
         async def prepare(selector):
             try:
@@ -610,9 +662,11 @@ class CiteFabricClient:
         if request.retrieval_policy == "structured_v3":
             try:
                 selected_rows, structured_meta = await structured_retrieve(
-                    self.store, [e.edition_id for e in editions], request
+                    self.store, [e.edition_id for e in editions], retrieval_request
                 )
                 plan = structured_meta["query_plan"]
+                plan["original"] = query
+                plan["effective_query"] = effective_query
                 trace = structured_meta["selection_trace"]
                 truncated = bool(trace["budget_rejected_candidates"])
                 if trace.get("outcome_code"):
@@ -638,8 +692,43 @@ class CiteFabricClient:
                     "requested_policy": "structured_v3",
                     "fallback_reason": getattr(exc, "code", "structure_index_timeout"),
                 }
-        if not structured_meta.get("structure_index_version"):
-            plan = query_plan(query, request.expand_query)
+        if request.retrieval_policy == "offline_structured_v4":
+            plan = offline_structured_plan(effective_query, request.expand_query)
+            plan["original"] = query
+            plan["effective_query"] = effective_query
+            rows, channel_trace = offline_structured_candidates(
+                self.store, [e.edition_id for e in editions], plan
+            )
+            plan["channel_trace"] = channel_trace
+            rows.sort(key=lambda row: (-row["rrf_score"], row["id"]))
+            truncated = False
+            selected_rows = []
+            for row in rows:
+                if counts[row["edition_id"]] >= 4:
+                    truncated = True
+                    continue
+                extraction = self.store.extraction(row["extraction_id"])
+                if not request.allow_abstract and extraction.coverage.source_kind == "abstract":
+                    continue
+                coverages[extraction.document_id] = extraction.coverage.model_dump(mode="json")
+                if (
+                    size + len(row["text"]) > request.max_chars
+                    or len(selected_rows) >= request.max_passages
+                ):
+                    truncated = True
+                    continue
+                selected_rows.append(row)
+                size += len(row["text"])
+                counts[row["edition_id"]] += 1
+            if request.include_context:
+                selected_rows = with_context(self.store, selected_rows, request.max_chars)
+        if (
+            not structured_meta.get("structure_index_version")
+            and request.retrieval_policy != "offline_structured_v4"
+        ):
+            plan = query_plan(effective_query, request.expand_query)
+            plan["original"] = query
+            plan["effective_query"] = effective_query
             rows = self.store.passage_search([e.edition_id for e in editions], plan["expanded"])
             if plan["mappings"]:
                 rows.sort(
@@ -732,15 +821,24 @@ class CiteFabricClient:
                 ],
                 coverage=coverages,
                 retrieval_method="fts5-bm25",
-                retrieval_version="3" if structured_meta.get("structure_index_version") else "2",
+                retrieval_version=(
+                    "3"
+                    if structured_meta.get("structure_index_version")
+                    else "4"
+                    if request.retrieval_policy == "offline_structured_v4"
+                    else "2"
+                ),
                 rerank_method=(
                     "region-conditions-v1"
                     if structured_meta.get("structure_index_version")
+                    else "bounded_channel_rrf-v1"
+                    if request.retrieval_policy == "offline_structured_v4"
                     else "weighted_glossary_coverage-v1"
                     if plan["mappings"]
                     else "none"
                 ),
                 query_plan=plan,
+                query_rewrite=rewrite,
                 context_policy=(
                     "role-regions-v1"
                     if structured_meta.get("structure_index_version")

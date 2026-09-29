@@ -139,12 +139,12 @@ async def test_import_failure_stays_in_matrix(tmp_path):
     prepared = tmp_path / "prepared"
     await ev.prepare(qpath, tmp_path / "input", prepared)
     data = await ev.run(prepared, tmp_path / "run")
-    assert len(data["rows"]) == 112
+    assert len(data["rows"]) == 112 * len(ev.POLICIES) // 2
     failed = [r for r in data["rows"] if r["paper_id"] == "synthetic0"]
-    assert len(failed) == 64
+    assert len(failed) == 64 * len(ev.POLICIES) // 2
     assert all(r["status"] == "import_failed" and not r["replay_integrity"] for r in failed)
     package = ev.blind(tmp_path / "run", tmp_path / "review", tmp_path / "key.json")
-    assert len(package["items"]) == 28
+    assert len(package["items"]) == 28 * len(ev.POLICIES) // 2
     assert all(not i["evidence"] for i in package["items"] if i["paper_id"] == "synthetic0")
 
 
@@ -164,13 +164,13 @@ async def test_synthetic_end_to_end_real_stdio(tmp_path, monkeypatch):
     monkeypatch.setattr(ev, "run", guarded_run)
     report = await synth.demo(directory)
     assert report["promotion"]["status"] == "not_evaluated"
-    assert report["failure_counts"] == {"v2": 0, "structured_v3": 0}
+    assert report["failure_counts"] == {policy: 0 for policy in ev.POLICIES}
     for language in ev.LANGUAGES:
         for policy in ev.POLICIES:
             assert report["metrics"][language][policy]["esr"]["denominator"] == 4
             assert report["metrics"][language][policy]["insufficient_mismatch"]["denominator"] == 2
     data = ev.read(directory / "run/run.json")
-    assert len(data["rows"]) == 112
+    assert len(data["rows"]) == 112 * len(ev.POLICIES) // 2
     assert all(r["replay_integrity"] and r["budget_ok"] for r in data["rows"])
     for row in data["rows"]:
         assert row["response_bytes"] == sum(len(ev.encoded(m)) for m in row["response_messages"])
@@ -178,7 +178,7 @@ async def test_synthetic_end_to_end_real_stdio(tmp_path, monkeypatch):
         assert row["response_bytes"] > len(ev.encoded(row["retrieval"]))
     package_path = directory / "review/items.json"
     package = ev.read(package_path)
-    assert len(package["items"]) == 28
+    assert len(package["items"]) == 28 * len(ev.POLICIES) // 2
     serialized = json.dumps(package)
     for forbidden in (
         "structured_v3",

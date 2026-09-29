@@ -62,6 +62,9 @@ GLOSSARY = {
     "区间": "interval intervals",
     "样本量": "sample samples",
     "信号": "signal",
+    "匹配滤波": "matched filter filtering",
+    "虚警率": "false alarm rate",
+    "上界": "upper bound",
     "显著性": "significance",
     "观测": "observed observation",
     "概率": "probability",
@@ -111,6 +114,137 @@ def query_plan(query: str, enabled: bool = True) -> dict[str, Any]:
         "contains_chinese": bool(re.search(r"[\u3400-\u9fff]", query)),
         "semantic_translation": False,
     }
+
+
+_SCOPE_MARKERS = (
+    "任意",
+    "所有",
+    "保证",
+    "是否证明",
+    "是否能推出",
+    "限制",
+    "不能说明",
+)
+_TABLE_MARKERS = ("表格", "表中", "表 ")
+
+
+def offline_structured_plan(query: str, enabled: bool = True) -> dict[str, Any]:
+    """Plan bounded, separately ranked local lexical channels.
+
+    This is deliberately a query planner, not a translator.  Chinese text stays
+    in its own channel for locally imported Chinese papers; glossary terms and
+    ASCII literals are searched separately so they cannot distort its rank.
+    """
+    plan = query_plan(query, enabled)
+    normalized = unicodedata.normalize("NFKC", query)
+    english_terms = list(dict.fromkeys(t for item in plan["mappings"] for t in item["terms"]))
+    literals = re.findall(r"[A-Za-z][A-Za-z0-9_-]*", normalized)
+    entity_terms = list(
+        dict.fromkeys(
+            token.replace("_", "")
+            for token in literals
+            if len(token) >= 3 and (token.isupper() or re.search(r"\d|_", token))
+        )
+    )
+    lowered = searchable_text(normalized)
+    scope_requested = any(marker in normalized for marker in _SCOPE_MARKERS) or bool(
+        re.search(
+            r"all conditions|all future|guarantee|universally|limitations|cannot conclude", lowered
+        )
+    )
+    # A broad numeric question is not proof that its answer is in a table.  The
+    # table channel therefore requires an explicit table reference; metric/table
+    # completeness is evaluated in a separate later experiment.
+    table_requested = any(marker in normalized for marker in _TABLE_MARKERS) or bool(
+        re.search(r"\btable\s*\d", lowered)
+    )
+    channels: list[dict[str, Any]] = [
+        {"id": "original", "query": normalized, "limit": 32, "role": "native_language"}
+    ]
+    if english_terms:
+        channels.append(
+            {
+                "id": "bilingual_glossary",
+                "query": " ".join(english_terms),
+                "limit": 32,
+                "role": "glossary_terms",
+            }
+        )
+    for term in entity_terms[:8]:
+        channels.append(
+            {"id": "entity:" + term, "query": term, "limit": 12, "role": "exact_entity"}
+        )
+    if table_requested:
+        channels.append(
+            {"id": "table_context", "query": "table results", "limit": 12, "role": "table_context"}
+        )
+    if scope_requested:
+        channels.append(
+            {
+                "id": "scope_context",
+                "query": "limitations scope no evidence cannot conclude guarantee",
+                "limit": 12,
+                "role": "scope_context",
+            }
+        )
+    plan.update(
+        {
+            "method": "offline-structured-channels-v4",
+            "channels": channels,
+            "entity_terms": entity_terms,
+            "scope_requested": scope_requested,
+            "table_requested": table_requested,
+            "semantic_translation": False,
+        }
+    )
+    return plan
+
+
+def offline_structured_candidates(
+    store: Store, edition_ids: list[str], plan: dict[str, Any]
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Fuse fixed-cap lexical channels using reciprocal-rank fusion.
+
+    Each query is issued independently.  The returned trace records the exact
+    queries and hit counts, making the local-only experiment replayable.
+    """
+    selected: dict[str, dict[str, Any]] = {}
+    trace: list[dict[str, Any]] = []
+    for channel in plan["channels"]:
+        rows = store.passage_search(edition_ids, channel["query"], limit=channel["limit"])
+        trace.append(
+            {
+                "id": channel["id"],
+                "role": channel["role"],
+                "query": channel["query"],
+                "limit": channel["limit"],
+                "candidates": len(rows),
+            }
+        )
+        for rank, source in enumerate(rows, 1):
+            row = selected.setdefault(source["id"], dict(source, channels={}))
+            row["channels"][channel["id"]] = rank
+    for row in selected.values():
+        text = searchable_text(row["text"])
+        entity_hits = sum(
+            bool(re.search(r"\b" + re.escape(entity.casefold()) + r"\b", text))
+            for entity in plan["entity_terms"]
+        )
+        table_bonus = 0.025 if plan["table_requested"] and "table" in text else 0.0
+        scope_bonus = (
+            0.025
+            if plan["scope_requested"]
+            and re.search(
+                r"limitations?|no evidence|cannot conclude|consistent with|upper bound", text
+            )
+            else 0.0
+        )
+        rrf = sum(1 / (60 + rank) for rank in row["channels"].values())
+        row["rrf_score"] = rrf + 0.035 * entity_hits + table_bonus + scope_bonus
+        # Existing response code represents better results with a lower BM25 score.
+        row["score"] = -row["rrf_score"]
+        row["score_basis"] = "bounded_channel_rrf-v1; lexical only, not semantic confidence"
+    return list(selected.values()), trace
 
 
 def concept_coverage(text: str, plan: dict) -> float:

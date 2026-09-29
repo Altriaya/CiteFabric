@@ -75,11 +75,21 @@
       "title": "Query",
       "type": "string"
     },
+    "query_rewrite": {
+      "default": "off",
+      "enum": [
+        "off",
+        "english_faithful"
+      ],
+      "title": "Query Rewrite",
+      "type": "string"
+    },
     "retrieval_policy": {
       "default": "v2",
       "enum": [
         "v2",
-        "structured_v3"
+        "structured_v3",
+        "offline_structured_v4"
       ],
       "title": "Retrieval Policy",
       "type": "string"

@@ -226,7 +226,9 @@ if __name__ == "__main__":
     parser.add_argument("--cases", type=Path, default=Path("benchmarks/real_papers.json"))
     parser.add_argument("--input-dir", type=Path, default=Path("data_test"))
     parser.add_argument("--query-language", choices=["en", "zh"], default="en")
-    parser.add_argument("--retrieval-policy", choices=["v2", "structured_v3"], default="v2")
+    parser.add_argument(
+        "--retrieval-policy", choices=["v2", "structured_v3", "offline_structured_v4"], default="v2"
+    )
     parser.add_argument("--max-chars", type=int, default=12000)
     parser.add_argument("--expand-query", action=argparse.BooleanOptionalAction, default=None)
     parser.add_argument("--include-context", action=argparse.BooleanOptionalAction, default=None)

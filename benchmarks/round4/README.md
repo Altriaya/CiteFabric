@@ -8,6 +8,10 @@
 4. [Promotion gate](promotion-gate.md)：最低规模、质量、完整性和成本门槛。
 5. [开发实验结果](development-results.md)：真实论文 pilot、模型查询改写和多查询融合的汇总与限制。
 6. [第二批新论文自审 pilot](blind-pilot-2-results.md)：5 篇新论文、60 个双语 intent 的封存检索结果与失败分析。
+7. [第二批中文改写诊断](translation-diagnostic-results.md)：在已开封的 5 篇论文上测试单条英文改写，并拆分候选召回与最终选择损失。
+8. [负例配对复评与选择器消融](negative-review-selection-ablation.md)：匿名复核 insufficient 错配，并否决退步的短窗口选择原型。
+9. [8 篇论文精确跨度开发实验](span-anchored-development-results.md)：完成 1,920 次 MCP 调用，并确认带英文锚点的模板中文题不能衡量跨语言泛化。
+10. [自然中文多语检索实验](natural-chinese-multilingual-results.md)：比较 v2、本地 E5、RRF 与跨编码器，记录默认预算收益及 insufficient 暴露风险。
 
 开发结果页同时记录了三轴语义判断契约实验。对应公共实现为 `src/citefabric/semantic.py` 和 `scripts/semantic_contract_eval.py`；它们定义并评测未来 verifier 的输出政策，不改变 0.1 的 `verify_claim=unavailable` 行为。
 

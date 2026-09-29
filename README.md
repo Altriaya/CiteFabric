@@ -50,6 +50,8 @@ uv run citefabric --data-dir .citefabric/my-project verify "claim" --paper FABRI
 
 0.1 的 verify 返回 `unavailable / verifier_not_configured`，但凭据会保留真实原文、定位、文档哈希和 grounding 状态。
 
+`find_evidence` 的 `query_rewrite="english_faithful"` 是默认关闭的实验接口。它只在调用方配置受审计的改写器时使用英文候选；会记录原问句、改写、模型、提示词版本和校验结果。数字、比较符号、拉丁术语或显式否定词丢失时，改写被拒绝并回退原问题。该校验不证明完整语义等价，也不启用语义 verdict。
+
 ## MCP 配置
 
 `uv run citefabric` 或 `uv run citefabric serve` 启动 stdio MCP。客户端配置示例：
@@ -163,6 +165,8 @@ SDK/MCP 的 `find_evidence` 同样接收 `retrieval_policy`。v3 先在至多 60
 首次打开旧工作区会将数据库 schema 1 升至 2，并在工作区 `backups/` 保存一致性备份；新结构索引按需构建，失败时明确回退 v2。旧版本程序不支持 schema 2，回退时使用备份或隔离工作区。
 
 第三轮同一六篇、38 题的最终结果：6000 字符下，英文锚点 34/36 → 36/36、中文 28/36 → 33/36；12000 字符下，英文 35/36 → 36/36、中文 29/36 → 33/36。后者平均返回字符减少约 41%–42%。这些是开发回归结果，不是独立盲测或语义准确率。详细诊断、消融和剩余问题见本地 `output/validation/round3/report.md`，设计与实现边界见 [v3 设计](docs/retrieval-v3-design.md)。
+
+`retrieval_policy="offline_structured_v4"` 是默认关闭的中文离线诊断策略：它分开检索原中文、有限术语表和显式实体，并在 `query_plan.channel_trace` 中保留每个通道的查询与候选数。它不联网也不调用模型。当前六篇论文的开发实验存在锚点回归，因此 v2 仍是默认策略；结论和复放位置见 [离线 v4 实验](docs/offline-v4-experiment.md)。
 
 ## 开发与文档
 

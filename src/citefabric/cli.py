@@ -131,6 +131,7 @@ def evidence(
     expand_query: bool = True,
     include_context: bool = True,
     retrieval_policy: str = "v2",
+    query_rewrite: str = "off",
     json: Machine = False,
 ):
     """Find bounded exact text passages in one edition."""
@@ -146,6 +147,7 @@ def evidence(
         expand_query=expand_query,
         include_context=include_context,
         retrieval_policy=retrieval_policy,
+        query_rewrite=query_rewrite,
     )
 
 
