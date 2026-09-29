@@ -191,7 +191,7 @@ SDK/MCP 的 `find_evidence` 同样接收 `retrieval_policy`。v3 先在至多 60
 
 `retrieval_policy="offline_structured_v4"` 是默认关闭的中文离线诊断策略：它分开检索原中文、有限术语表和显式实体，并在 `query_plan.channel_trace` 中保留每个通道的查询与候选数。它不联网也不调用模型。当前六篇论文的开发实验存在锚点回归，因此 v2 仍是默认策略；结论和复放位置见 [离线 v4 实验](docs/offline-v4-experiment.md)。
 
-`retrieval_policy="offline_structured_v5"` 是仍未默认启用的开发候选。它在冻结的 v4 之外增加数值组合、表/图编号、条件对立词与受字符预算约束的同页材料打包，用于检索带数值、表格和限定条件的中文论断。当前打开式开发实验达到 15/15 锚点覆盖，但该集合参与了规则诊断，不能作为泛化或上线依据；方法、模型核验结果和限制见 [离线 v5 实验](docs/offline-v5-experiment.md)。
+`retrieval_policy="offline_structured_v5"` 是默认关闭且已被跨论文实验拒绝的诊断策略。它在 15 条打开式开发题上达到 15/15 锚点覆盖，但在 13 篇、140 条冻结题的回溯留出评测中，英文/中文完整证据覆盖仅为 40.4%/43.1%，低于 v2 的 83.5%/60.6%。v5 不可作为发布候选；方法、失败分析和模型核验结果见 [离线 v5 实验](docs/offline-v5-experiment.md) 与 [跨论文结果](benchmarks/round4/offline-v5-retrospective-results.md)。
 
 ## 开发与文档
 
