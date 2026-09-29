@@ -111,8 +111,10 @@ async def run(args) -> None:
     configured = Config.load()
     args.provider = args.provider or configured.verifier_provider
     args.model = args.model or configured.verifier_model
-    if args.provider not in {"openai", "quickrouter"}:
-        raise SystemExit("Select verifier_provider=openai or quickrouter in config or --provider.")
+    if args.provider not in {"openai", "quickrouter", "openai_compatible"}:
+        raise SystemExit(
+            "Select verifier_provider=openai, quickrouter, or openai_compatible in config or --provider."
+        )
     benchmark = read(args.benchmark)
     cases = selected_cases(args, benchmark)
     frozen = [frozen_case(case, args.evidence_dir) for case in cases]
@@ -135,15 +137,17 @@ async def run(args) -> None:
             verifier_model=args.model,
             verifier_reasoning_effort=args.reasoning_effort,
         )
-        credential = (
-            config.openai_api_key if args.provider == "openai" else config.quickrouter_api_key
-        )
+        credential = {
+            "openai": config.openai_api_key,
+            "quickrouter": config.quickrouter_api_key,
+            "openai_compatible": config.compatible_api_key,
+        }[args.provider]
         if credential is None:
-            variable = (
-                "CITEFABRIC_OPENAI_API_KEY or OPENAI_API_KEY"
-                if args.provider == "openai"
-                else "CITEFABRIC_QUICKROUTER_API_KEY or QUICKROUTER_API_KEY"
-            )
+            variable = {
+                "openai": "CITEFABRIC_OPENAI_API_KEY or OPENAI_API_KEY",
+                "quickrouter": "CITEFABRIC_QUICKROUTER_API_KEY or QUICKROUTER_API_KEY",
+                "openai_compatible": "CITEFABRIC_COMPATIBLE_API_KEY",
+            }[args.provider]
             raise SystemExit(f"No {args.provider} API key configured. Set {variable}.")
         results = []
         requests_made = 0
@@ -227,7 +231,7 @@ def main() -> None:
     parser.add_argument(
         "--output", type=Path, default=Path("output/verifier/openai_dev_pilot.json")
     )
-    parser.add_argument("--provider", choices=("openai", "quickrouter"))
+    parser.add_argument("--provider", choices=("openai", "quickrouter", "openai_compatible"))
     parser.add_argument("--model")
     parser.add_argument(
         "--reasoning-effort", choices=("none", "low", "medium", "high", "xhigh"), default="medium"

@@ -11,6 +11,7 @@
 - [contradiction-boundary-v1.json](contradiction-boundary-v1.json)：从已开封 Round 2 开发集中冻结的 contradiction 边界样例。
 - [contradiction-boundary-v1-adjudication.json](contradiction-boundary-v1-adjudication.json)：边界样例的模型复核与开发集仲裁记录。
 - [contradiction-boundary-v1-report.md](contradiction-boundary-v1-report.md)：实验结果、限制和后续动作。
+- [gpt56sol-compatible-round2-report.md](gpt56sol-compatible-round2-report.md)：GPT-5.6-sol 在兼容 Chat Completions provider 上的完整 Round 2 开发实验。
 
 生成 Schema：
 

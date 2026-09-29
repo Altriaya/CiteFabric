@@ -21,11 +21,12 @@ class Config(Model):
     semantic_scholar_api_key: SecretStr | None = None
     openai_api_key: SecretStr | None = None
     quickrouter_api_key: SecretStr | None = None
+    compatible_api_key: SecretStr | None = None
     search_timeout: float = Field(default=12, gt=0, le=60)
     request_timeout: float = Field(default=8, gt=0, le=30)
     evidence_timeout: float = Field(default=45, gt=0, le=120)
     verifier_timeout: float = Field(default=30, gt=0, le=120)
-    verifier_provider: Literal["none", "openai", "quickrouter"] = "none"
+    verifier_provider: Literal["none", "openai", "quickrouter", "openai_compatible"] = "none"
     verifier_base_url: str | None = Field(default=None, max_length=2048)
     verifier_model: str = Field(default="gpt-5.5-2026-04-23", min_length=1, max_length=200)
     verifier_reasoning_effort: Literal["none", "low", "medium", "high", "xhigh"] = "medium"
@@ -40,6 +41,8 @@ class Config(Model):
     def unique_sources(self):
         if len(set(self.sources)) != len(self.sources):
             raise ValueError("sources must be unique")
+        if self.verifier_provider == "openai_compatible" and not self.verifier_base_url:
+            raise ValueError("openai_compatible verifier requires verifier_base_url")
         return self
 
     @classmethod

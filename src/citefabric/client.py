@@ -1329,12 +1329,14 @@ class CiteFabricClient:
                 semantic_scholar=bool(self.config.semantic_scholar_api_key),
                 openai=bool(self.config.openai_api_key),
                 quickrouter=bool(self.config.quickrouter_api_key),
+                openai_compatible=bool(self.config.compatible_api_key),
             ),
             verifier_config=dict(
                 provider=self.config.verifier_provider,
                 model=(
                     self.config.verifier_model
-                    if self.config.verifier_provider in {"openai", "quickrouter"}
+                    if self.config.verifier_provider
+                    in {"openai", "quickrouter", "openai_compatible"}
                     else None
                 ),
                 credentials_configured=(
@@ -1342,6 +1344,8 @@ class CiteFabricClient:
                     if self.config.verifier_provider == "openai"
                     else bool(self.config.quickrouter_api_key)
                     if self.config.verifier_provider == "quickrouter"
+                    else bool(self.config.compatible_api_key)
+                    if self.config.verifier_provider == "openai_compatible"
                     else None
                 ),
             ),

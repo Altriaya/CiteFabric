@@ -127,6 +127,7 @@ offline = false
 - `CITEFABRIC_VERIFIER_PROVIDER=openai`：显式启用 OpenAI 语义 verifier。
 - `CITEFABRIC_OPENAI_API_KEY`：verifier 凭据；未设置时也会读取标准 `OPENAI_API_KEY`。
 - `CITEFABRIC_VERIFIER_PROVIDER=quickrouter`、`CITEFABRIC_QUICKROUTER_API_KEY`：使用 QuickRouter 的 Responses 兼容端点；也可读取 `QUICKROUTER_API_KEY`。
+- `CITEFABRIC_VERIFIER_PROVIDER=openai_compatible`、`CITEFABRIC_COMPATIBLE_API_KEY`：使用支持严格 `response_format=json_schema` 的 Chat Completions 兼容端点，并要求同时设置 Base URL。
 - `CITEFABRIC_VERIFIER_BASE_URL`：覆盖兼容 provider 的 Base URL。
 - `CITEFABRIC_VERIFIER_MODEL`、`CITEFABRIC_VERIFIER_REASONING_EFFORT`：固定模型快照与推理强度。
 

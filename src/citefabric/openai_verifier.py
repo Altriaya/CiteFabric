@@ -52,6 +52,22 @@ def strict_response_schema() -> dict[str, Any]:
     """Generate the strict JSON Schema sent to the Responses API."""
 
     schema = copy.deepcopy(VerifierResponse.model_json_schema())
+    definitions = schema.pop("$defs", {})
+
+    def inline_refs(value):
+        if isinstance(value, dict):
+            reference = value.get("$ref")
+            if isinstance(reference, str) and reference.startswith("#/$defs/"):
+                name = reference.removeprefix("#/$defs/")
+                resolved = copy.deepcopy(definitions[name])
+                resolved.update({key: child for key, child in value.items() if key != "$ref"})
+                return inline_refs(resolved)
+            return {key: inline_refs(child) for key, child in value.items()}
+        if isinstance(value, list):
+            return [inline_refs(child) for child in value]
+        return value
+
+    schema = inline_refs(schema)
 
     def visit(value):
         if isinstance(value, dict):
@@ -81,7 +97,7 @@ def prompt_hash() -> str:
     )
 
 
-def _output_text(payload: dict[str, Any]) -> str:
+def _responses_output_text(payload: dict[str, Any]) -> str:
     if payload.get("status") != "completed":
         raise FabricError(
             "verifier_incomplete", "The verifier response did not complete successfully."
@@ -105,6 +121,21 @@ def _output_text(payload: dict[str, Any]) -> str:
     return "".join(texts)
 
 
+def _chat_output_text(payload: dict[str, Any]) -> str:
+    choices = payload.get("choices")
+    if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
+        raise FabricError("invalid_model_output", "The verifier returned no chat completion.")
+    message = choices[0].get("message")
+    if not isinstance(message, dict):
+        raise FabricError("invalid_model_output", "The verifier returned no chat message.")
+    if message.get("refusal"):
+        raise FabricError("verifier_refused", "The verifier refused the assessment request.")
+    content = message.get("content")
+    if not isinstance(content, str) or not content:
+        raise FabricError("invalid_model_output", "The verifier returned no structured output.")
+    return content
+
+
 def _api_error_fields(response: httpx.Response) -> tuple[str | None, str | None]:
     try:
         payload = response.json()
@@ -126,13 +157,13 @@ def _usage(
 ) -> tuple[VerifierUsage, str | None]:
     raw_value = payload.get("usage")
     raw: dict[str, Any] = raw_value if isinstance(raw_value, dict) else {}
-    input_tokens = int(raw.get("input_tokens") or 0)
-    output_tokens = int(raw.get("output_tokens") or 0)
-    input_details_value = raw.get("input_tokens_details")
+    input_tokens = int(raw.get("input_tokens") or raw.get("prompt_tokens") or 0)
+    output_tokens = int(raw.get("output_tokens") or raw.get("completion_tokens") or 0)
+    input_details_value = raw.get("input_tokens_details") or raw.get("prompt_tokens_details")
     input_details: dict[str, Any] = (
         input_details_value if isinstance(input_details_value, dict) else {}
     )
-    output_details_value = raw.get("output_tokens_details")
+    output_details_value = raw.get("output_tokens_details") or raw.get("completion_tokens_details")
     output_details: dict[str, Any] = (
         output_details_value if isinstance(output_details_value, dict) else {}
     )
@@ -171,7 +202,7 @@ def _usage(
 
 
 class OpenAIVerifierBackend:
-    """Strict GPT-5.5 verifier over an explicitly selected Responses endpoint."""
+    """Strict verifier over an explicitly selected OpenAI-style endpoint."""
 
     def __init__(self, config: Config, *, http_client: httpx.AsyncClient | None = None):
         self.config = config
@@ -180,12 +211,21 @@ class OpenAIVerifierBackend:
             self.provider = "quickrouter"
             self.api_key = config.quickrouter_api_key
             base_url = config.verifier_base_url or QUICKROUTER_BASE_URL
-            self.responses_url = base_url.rstrip("/") + "/responses"
+            self.endpoint_url = base_url.rstrip("/") + "/responses"
+            self.api_style = "responses"
+            self.direct_openai_pricing = False
+        elif config.verifier_provider == "openai_compatible":
+            self.provider = "openai_compatible"
+            self.api_key = config.compatible_api_key
+            assert config.verifier_base_url is not None
+            self.endpoint_url = config.verifier_base_url.rstrip("/") + "/chat/completions"
+            self.api_style = "chat_completions"
             self.direct_openai_pricing = False
         else:
             self.provider = "openai"
             self.api_key = config.openai_api_key
-            self.responses_url = OPENAI_RESPONSES_URL
+            self.endpoint_url = OPENAI_RESPONSES_URL
+            self.api_style = "responses"
             self.direct_openai_pricing = True
         self._owns_client = http_client is None
         self.http = http_client or httpx.AsyncClient(trust_env=True)
@@ -200,31 +240,53 @@ class OpenAIVerifierBackend:
                 "verifier_authentication_failed",
                 "The configured verifier requires an API key.",
             )
-        body = {
-            "model": self.config.verifier_model,
-            "instructions": INSTRUCTIONS,
-            "input": dump(
-                {
-                    "task": "Assess every atomic claim against only this frozen evidence bundle.",
-                    "request": request.model_dump(mode="json"),
-                }
-            ),
-            "reasoning": {"effort": self.config.verifier_reasoning_effort},
-            "max_output_tokens": self.config.verifier_max_output_tokens,
-            "text": {
-                "format": {
-                    "type": "json_schema",
-                    "name": "citefabric_verifier_response",
-                    "description": "Evidence-bound semantic observations for every atomic claim.",
-                    "strict": True,
-                    "schema": strict_response_schema(),
-                }
-            },
-            "store": False,
+        model_input_payload = {
+            "task": "Assess every atomic claim against only this frozen evidence bundle.",
+            "request": request.model_dump(mode="json"),
         }
+        if self.api_style == "chat_completions":
+            model_input_payload["output_json_schema"] = strict_response_schema()
+        model_input = dump(model_input_payload)
+        if self.api_style == "chat_completions":
+            body = {
+                "model": self.config.verifier_model,
+                "messages": [
+                    {"role": "system", "content": INSTRUCTIONS},
+                    {"role": "user", "content": model_input},
+                ],
+                "reasoning_effort": self.config.verifier_reasoning_effort,
+                "max_completion_tokens": self.config.verifier_max_output_tokens,
+                "response_format": {
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "citefabric_verifier_response",
+                        "description": "Evidence-bound semantic observations for every atomic claim.",
+                        "strict": True,
+                        "schema": strict_response_schema(),
+                    },
+                },
+            }
+        else:
+            body = {
+                "model": self.config.verifier_model,
+                "instructions": INSTRUCTIONS,
+                "input": model_input,
+                "reasoning": {"effort": self.config.verifier_reasoning_effort},
+                "max_output_tokens": self.config.verifier_max_output_tokens,
+                "text": {
+                    "format": {
+                        "type": "json_schema",
+                        "name": "citefabric_verifier_response",
+                        "description": "Evidence-bound semantic observations for every atomic claim.",
+                        "strict": True,
+                        "schema": strict_response_schema(),
+                    }
+                },
+                "store": False,
+            }
         try:
             response = await self.http.post(
-                self.responses_url,
+                self.endpoint_url,
                 headers={
                     "Authorization": "Bearer " + self.api_key.get_secret_value(),
                     "Content-Type": "application/json",
@@ -273,7 +335,12 @@ class OpenAIVerifierBackend:
             payload = response.json()
             if not isinstance(payload, dict):
                 raise ValueError
-            parsed = VerifierResponse.model_validate_json(_output_text(payload))
+            output_text = (
+                _chat_output_text(payload)
+                if self.api_style == "chat_completions"
+                else _responses_output_text(payload)
+            )
+            parsed = VerifierResponse.model_validate_json(output_text)
             usage, pricing_version = _usage(
                 payload,
                 self.config.verifier_model,

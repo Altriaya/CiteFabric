@@ -13,6 +13,7 @@ def isolate_user_configuration(monkeypatch, tmp_path):
     for name in (
         "CITEFABRIC_OPENAI_API_KEY",
         "CITEFABRIC_QUICKROUTER_API_KEY",
+        "CITEFABRIC_COMPATIBLE_API_KEY",
         "CITEFABRIC_VERIFIER_PROVIDER",
         "OPENAI_API_KEY",
         "QUICKROUTER_API_KEY",

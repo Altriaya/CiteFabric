@@ -117,12 +117,52 @@ def completed_quickrouter_response(request):
     )
 
 
+def completed_compatible_chat_response(request):
+    body = json.loads(request.content)
+    assert request.url == "https://router.example/v1/chat/completions"
+    assert request.headers["authorization"] == "Bearer compatible-key"
+    assert body["model"] == "gpt-5.6-sol"
+    assert body["reasoning_effort"] == "medium"
+    assert body["response_format"]["type"] == "json_schema"
+    assert body["response_format"]["json_schema"]["strict"] is True
+    assert body["messages"][0] == {"role": "system", "content": INSTRUCTIONS}
+    model_input = json.loads(body["messages"][1]["content"])
+    assert "reference_verdict" not in body["messages"][1]["content"]
+    assert model_input["output_json_schema"] == strict_response_schema()
+    verifier_request = model_input["request"]
+    output = supported_response(
+        verifier_request["atoms"][0]["atom_id"],
+        verifier_request["evidence"][0]["evidence_id"],
+    )
+    return httpx.Response(
+        200,
+        json={
+            "id": "chatcmpl_compatible_123",
+            "model": "gpt-5.6-sol",
+            "choices": [
+                {
+                    "finish_reason": "stop",
+                    "message": {"role": "assistant", "content": output.model_dump_json()},
+                }
+            ],
+            "usage": {
+                "prompt_tokens": 120,
+                "prompt_tokens_details": {"cached_tokens": 30},
+                "completion_tokens": 60,
+                "completion_tokens_details": {"reasoning_tokens": 12},
+            },
+        },
+    )
+
+
 def test_openai_schema_is_strict_and_has_no_defaults():
     schema = strict_response_schema()
+    assert "$defs" not in schema
 
     def inspect(value):
         if isinstance(value, dict):
             assert "default" not in value
+            assert "$ref" not in value
             if isinstance(value.get("properties"), dict):
                 assert set(value["required"]) == set(value["properties"])
                 assert value["additionalProperties"] is False
@@ -194,6 +234,46 @@ async def test_quickrouter_uses_compatible_endpoint_without_openai_price_assumpt
     assert doctor.data["verifier_config"] == {
         "provider": "quickrouter",
         "model": "gpt-5.5",
+        "credentials_configured": True,
+    }
+
+
+async def test_openai_compatible_uses_chat_json_schema_without_price_assumption(tmp_path):
+    transport = httpx.MockTransport(completed_compatible_chat_response)
+    config = Config(
+        data_dir=tmp_path / "workspace",
+        offline=True,
+        verifier_provider="openai_compatible",
+        verifier_base_url="https://router.example/v1",
+        verifier_model="gpt-5.6-sol",
+        compatible_api_key="compatible-key",
+    )
+    async with httpx.AsyncClient(transport=transport) as http:
+        async with CiteFabricClient(config, verifier_http_client=http) as client:
+            selector, evidence = await imported_evidence(client, tmp_path)
+            result = await client.verify_claim(
+                "The system reports 42% accuracy.",
+                selector,
+                evidence_ids=[evidence["evidence_id"]],
+            )
+            doctor = await client.doctor()
+
+    assessment = result.data["receipts"][0]["assessment"]
+    assert assessment["verdict"] == "supported"
+    assert assessment["verifier"]["provider"] == "openai_compatible"
+    assert assessment["verifier"]["response_id"] == "chatcmpl_compatible_123"
+    assert assessment["verifier"]["pricing_version"] is None
+    assert assessment["usage"] == {
+        "input_tokens": 120,
+        "cached_input_tokens": 30,
+        "output_tokens": 60,
+        "reasoning_output_tokens": 12,
+        "cost": None,
+        "currency": None,
+    }
+    assert doctor.data["verifier_config"] == {
+        "provider": "openai_compatible",
+        "model": "gpt-5.6-sol",
         "credentials_configured": True,
     }
 
