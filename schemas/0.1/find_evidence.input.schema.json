@@ -90,7 +90,8 @@
         "v2",
         "structured_v3",
         "offline_structured_v4",
-        "offline_structured_v5"
+        "offline_structured_v5",
+        "offline_structured_v6"
       ],
       "title": "Retrieval Policy",
       "type": "string"

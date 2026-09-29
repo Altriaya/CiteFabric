@@ -228,7 +228,13 @@ if __name__ == "__main__":
     parser.add_argument("--query-language", choices=["en", "zh"], default="en")
     parser.add_argument(
         "--retrieval-policy",
-        choices=["v2", "structured_v3", "offline_structured_v4", "offline_structured_v5"],
+        choices=[
+            "v2",
+            "structured_v3",
+            "offline_structured_v4",
+            "offline_structured_v5",
+            "offline_structured_v6",
+        ],
         default="v2",
     )
     parser.add_argument("--max-chars", type=int, default=12000)

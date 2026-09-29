@@ -156,6 +156,18 @@ _SCOPE_MARKERS = (
     "不能说明",
 )
 _TABLE_MARKERS = ("表格", "表中", "表 ")
+_MATERIAL_CONDITION_MARKERS = (
+    "并集",
+    "交集",
+    "同时",
+    "分别",
+    "提升至",
+    "下降至",
+    "高于",
+    "低于",
+    "越大",
+    "越小",
+)
 
 _SMALL_NUMBER_WORDS = {
     "0": "zero",
@@ -183,7 +195,11 @@ _SMALL_NUMBER_WORDS = {
 
 
 def offline_structured_plan(
-    query: str, enabled: bool = True, *, material_channels: bool = False
+    query: str,
+    enabled: bool = True,
+    *,
+    material_channels: bool = False,
+    safe_material_routing: bool = False,
 ) -> dict[str, Any]:
     """Plan bounded, separately ranked local lexical channels.
 
@@ -251,6 +267,16 @@ def offline_structured_plan(
         reference_terms = [
             {"kind": kind, "number": number} for kind, number in dict.fromkeys(references)
         ]
+    joint_requested = material_channels and (
+        any(marker in normalized for marker in _MATERIAL_CONDITION_MARKERS)
+        or bool(
+            re.search(
+                r"\b(?:both|respectively|union|intersection|higher than|lower than)\b",
+                lowered,
+            )
+        )
+    )
+    material_signal = bool(numeric_terms or reference_terms or joint_requested)
     channels: list[dict[str, Any]] = [
         {"id": "original", "query": normalized, "limit": 32, "role": "native_language"}
     ]
@@ -305,7 +331,9 @@ def offline_structured_plan(
     plan.update(
         {
             "method": (
-                "offline-material-channels-v5"
+                "offline-safe-material-route-v6"
+                if safe_material_routing
+                else "offline-material-channels-v5"
                 if material_channels
                 else "offline-structured-channels-v4"
             ),
@@ -315,6 +343,9 @@ def offline_structured_plan(
             "numeric_aliases": numeric_aliases,
             "reference_terms": reference_terms,
             "material_channels": material_channels,
+            "material_signal": material_signal,
+            "joint_requested": joint_requested,
+            "front_matter_tiebreak": material_channels and not safe_material_routing,
             "scope_requested": scope_requested,
             "table_requested": table_requested,
             "semantic_translation": False,
@@ -400,7 +431,7 @@ def offline_structured_candidates(
         # explicit table/figure references still carry larger combined weight.
         front_matter_bonus = (
             0.04 / max(1, int(page_match.group(1)))
-            if plan.get("material_channels") and page_match
+            if plan.get("front_matter_tiebreak") and page_match
             else 0.0
         )
         rrf = sum(1 / (60 + rank) for rank in row["channels"].values())
@@ -418,7 +449,9 @@ def offline_structured_candidates(
         # Existing response code represents better results with a lower BM25 score.
         row["score"] = -row["rrf_score"]
         row["score_basis"] = (
-            "material_channel_rrf-v2; lexical only, not semantic confidence"
+            "material_channel_rrf-v3; lexical only, not semantic confidence"
+            if plan.get("material_channels") and not plan.get("front_matter_tiebreak")
+            else "material_channel_rrf-v2; lexical only, not semantic confidence"
             if plan.get("material_channels")
             else "bounded_channel_rrf-v1; lexical only, not semantic confidence"
         )

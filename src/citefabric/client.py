@@ -682,6 +682,16 @@ class CiteFabricClient:
         structured_meta: dict[str, Any] = {}
         selected_rows: list[dict[str, Any]] = []
         truncated = False
+        v6_plan = None
+        v6_material = False
+        if request.retrieval_policy == "offline_structured_v6":
+            v6_plan = offline_structured_plan(
+                effective_query,
+                request.expand_query,
+                material_channels=True,
+                safe_material_routing=True,
+            )
+            v6_material = v6_plan["material_signal"]
         if request.retrieval_policy == "structured_v3":
             try:
                 selected_rows, structured_meta = await structured_retrieve(
@@ -715,12 +725,21 @@ class CiteFabricClient:
                     "requested_policy": "structured_v3",
                     "fallback_reason": getattr(exc, "code", "structure_index_timeout"),
                 }
-        if request.retrieval_policy in {"offline_structured_v4", "offline_structured_v5"}:
-            plan = offline_structured_plan(
-                effective_query,
-                request.expand_query,
-                material_channels=request.retrieval_policy == "offline_structured_v5",
+        if request.retrieval_policy in {"offline_structured_v4", "offline_structured_v5"} or (
+            request.retrieval_policy == "offline_structured_v6" and v6_material
+        ):
+            plan = (
+                v6_plan
+                if v6_plan is not None
+                else offline_structured_plan(
+                    effective_query,
+                    request.expand_query,
+                    material_channels=request.retrieval_policy == "offline_structured_v5",
+                )
             )
+            assert plan is not None
+            if request.retrieval_policy == "offline_structured_v6":
+                plan["route"] = "material"
             plan["original"] = query
             plan["effective_query"] = effective_query
             rows, channel_trace = offline_structured_candidates(
@@ -730,8 +749,9 @@ class CiteFabricClient:
             rows.sort(key=lambda row: (-row["rrf_score"], row["id"]))
             truncated = False
             selected_rows = []
+            per_edition_limit = 3 if request.retrieval_policy == "offline_structured_v6" else 4
             for row in rows:
-                if counts[row["edition_id"]] >= 4:
+                if counts[row["edition_id"]] >= per_edition_limit:
                     truncated = True
                     continue
                 extraction = self.store.extraction(row["extraction_id"])
@@ -758,11 +778,25 @@ class CiteFabricClient:
                     )
                     else with_context(self.store, selected_rows, request.max_chars)
                 )
-        if not structured_meta.get("structure_index_version") and request.retrieval_policy not in {
-            "offline_structured_v4",
-            "offline_structured_v5",
-        }:
+        if (
+            not structured_meta.get("structure_index_version")
+            and request.retrieval_policy
+            not in {
+                "offline_structured_v4",
+                "offline_structured_v5",
+            }
+            and not (request.retrieval_policy == "offline_structured_v6" and v6_material)
+        ):
             plan = query_plan(effective_query, request.expand_query)
+            if request.retrieval_policy == "offline_structured_v6":
+                plan.update(
+                    method="offline-safe-material-route-v6",
+                    route="v2_baseline",
+                    material_signal=False,
+                    joint_requested=False,
+                    numeric_terms=[],
+                    reference_terms=[],
+                )
             plan["original"] = query
             plan["effective_query"] = effective_query
             rows = self.store.passage_search([e.edition_id for e in editions], plan["expanded"])
@@ -860,6 +894,8 @@ class CiteFabricClient:
                 retrieval_version=(
                     "3"
                     if structured_meta.get("structure_index_version")
+                    else "6"
+                    if request.retrieval_policy == "offline_structured_v6"
                     else "5"
                     if request.retrieval_policy == "offline_structured_v5"
                     else "4"
@@ -869,6 +905,10 @@ class CiteFabricClient:
                 rerank_method=(
                     "region-conditions-v1"
                     if structured_meta.get("structure_index_version")
+                    else "material_channel_rrf-v3"
+                    if request.retrieval_policy == "offline_structured_v6" and v6_material
+                    else "v2-baseline-invariant"
+                    if request.retrieval_policy == "offline_structured_v6"
                     else "material_channel_rrf-v2"
                     if request.retrieval_policy == "offline_structured_v5"
                     else "bounded_channel_rrf-v1"

@@ -49,6 +49,50 @@ def test_offline_structured_v5_expands_small_number_words():
     assert numeric["query"] == "13 thirteen"
 
 
+def test_offline_structured_v6_routes_only_explicit_material_queries():
+    ordinary = offline_structured_plan(
+        "BERT uses masked language modeling", material_channels=True, safe_material_routing=True
+    )
+    material = offline_structured_plan(
+        "表 3 中 17.607 与 39.303 分别是多少？",
+        material_channels=True,
+        safe_material_routing=True,
+    )
+
+    assert ordinary["method"] == "offline-safe-material-route-v6"
+    assert ordinary["material_signal"] is False
+    assert ordinary["front_matter_tiebreak"] is False
+    assert material["material_signal"] is True
+    assert material["joint_requested"] is True
+    assert material["front_matter_tiebreak"] is False
+
+
+async def test_offline_structured_v6_preserves_v2_for_ordinary_queries(config, tmp_path):
+    path = tmp_path / "ordinary.txt"
+    path.write_text(
+        "Early general background.\n\n"
+        "The masked language modeling objective predicts hidden tokens.\n\n"
+        "Later unrelated discussion."
+    )
+    async with CiteFabricClient(config) as client:
+        imported = await client.import_document(path)
+        selector = [{"ref": imported.data["fabric_id"]}]
+        baseline = await client.find_evidence(
+            selector, "masked language modeling objective", retrieval_policy="v2"
+        )
+        candidate = await client.find_evidence(
+            selector,
+            "masked language modeling objective",
+            retrieval_policy="offline_structured_v6",
+        )
+
+    assert candidate.data["query_plan"]["route"] == "v2_baseline"
+    assert candidate.data["rerank_method"] == "v2-baseline-invariant"
+    assert [h["evidence"]["excerpt"] for h in candidate.data["hits"]] == [
+        h["evidence"]["excerpt"] for h in baseline.data["hits"]
+    ]
+
+
 async def test_offline_structured_v4_uses_glossary_without_combining_chinese_fts(config, tmp_path):
     path = tmp_path / "study.txt"
     path.write_text(
@@ -75,7 +119,9 @@ async def test_offline_structured_v4_uses_glossary_without_combining_chinese_fts
     assert glossary["candidates"] >= 1
 
 
-@pytest.mark.parametrize("policy", ["v2", "offline_structured_v4", "offline_structured_v5"])
+@pytest.mark.parametrize(
+    "policy", ["v2", "offline_structured_v4", "offline_structured_v5", "offline_structured_v6"]
+)
 async def test_offline_structured_policy_preserves_bounded_evidence(config, tmp_path, policy):
     path = tmp_path / "bounded.txt"
     path.write_text("Table 1: ModelRiver accuracy 97.8 percent. " + "context " * 200)
