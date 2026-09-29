@@ -89,7 +89,7 @@ def frozen_case(case: dict, evidence_dir: Path) -> dict:
 
 def base_report(args, frozen: list[dict]) -> dict:
     return {
-        "kind": "citefabric_openai_verifier_opened_dev_v1",
+        "kind": "citefabric_responses_verifier_opened_dev_v1",
         "created_at": datetime.now(UTC).isoformat(),
         "promotion_eligible": False,
         "gold_visible_to_model": False,
@@ -97,17 +97,22 @@ def base_report(args, frozen: list[dict]) -> dict:
         "benchmark_hash": file_hash(args.benchmark),
         "evidence_dir": str(args.evidence_dir),
         "data_dir": str(args.data_dir),
-        "provider": "openai",
+        "provider": args.provider,
         "model": args.model,
         "prompt_version": PROMPT_VERSION,
         "prompt_hash": prompt_hash(),
-        "pricing_version": PRICING_VERSION,
+        "pricing_version": PRICING_VERSION if args.provider == "openai" else None,
         "reasoning_effort": args.reasoning_effort,
         "cases": frozen,
     }
 
 
 async def run(args) -> None:
+    configured = Config.load()
+    args.provider = args.provider or configured.verifier_provider
+    args.model = args.model or configured.verifier_model
+    if args.provider not in {"openai", "quickrouter"}:
+        raise SystemExit("Select verifier_provider=openai or quickrouter in config or --provider.")
     benchmark = read(args.benchmark)
     cases = selected_cases(args, benchmark)
     frozen = [frozen_case(case, args.evidence_dir) for case in cases]
@@ -126,14 +131,20 @@ async def run(args) -> None:
         config = Config.load(
             data_dir=args.data_dir,
             offline=True,
-            verifier_provider="openai",
+            verifier_provider=args.provider,
             verifier_model=args.model,
             verifier_reasoning_effort=args.reasoning_effort,
         )
-        if config.openai_api_key is None:
-            raise SystemExit(
-                "No OpenAI API key configured. Set CITEFABRIC_OPENAI_API_KEY or OPENAI_API_KEY."
+        credential = (
+            config.openai_api_key if args.provider == "openai" else config.quickrouter_api_key
+        )
+        if credential is None:
+            variable = (
+                "CITEFABRIC_OPENAI_API_KEY or OPENAI_API_KEY"
+                if args.provider == "openai"
+                else "CITEFABRIC_QUICKROUTER_API_KEY or QUICKROUTER_API_KEY"
             )
+            raise SystemExit(f"No {args.provider} API key configured. Set {variable}.")
         results = []
         requests_made = 0
         async with CiteFabricClient(config) as client:
@@ -216,7 +227,8 @@ def main() -> None:
     parser.add_argument(
         "--output", type=Path, default=Path("output/verifier/openai_dev_pilot.json")
     )
-    parser.add_argument("--model", default="gpt-5.5-2026-04-23")
+    parser.add_argument("--provider", choices=("openai", "quickrouter"))
+    parser.add_argument("--model")
     parser.add_argument(
         "--reasoning-effort", choices=("none", "low", "medium", "high", "xhigh"), default="medium"
     )

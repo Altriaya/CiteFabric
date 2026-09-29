@@ -16,6 +16,7 @@ from .verifier_backend import VerifierBackendResult
 from .verifier_contract import VerifierRequest, VerifierResponse, VerifierUsage
 
 OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
+QUICKROUTER_BASE_URL = "https://api.quickrouter.ai/v1"
 PROMPT_VERSION = "openai-semantic-verifier-v1"
 PRICING_VERSION = "openai-2026-09-29"
 
@@ -120,7 +121,9 @@ def _api_error_fields(response: httpx.Response) -> tuple[str | None, str | None]
     )
 
 
-def _usage(payload: dict[str, Any], requested_model: str) -> tuple[VerifierUsage, str | None]:
+def _usage(
+    payload: dict[str, Any], requested_model: str, *, direct_openai_pricing: bool = True
+) -> tuple[VerifierUsage, str | None]:
     raw_value = payload.get("usage")
     raw: dict[str, Any] = raw_value if isinstance(raw_value, dict) else {}
     input_tokens = int(raw.get("input_tokens") or 0)
@@ -136,7 +139,11 @@ def _usage(payload: dict[str, Any], requested_model: str) -> tuple[VerifierUsage
     cached_tokens = int(input_details.get("cached_tokens") or 0)
     reasoning_tokens = int(output_details.get("reasoning_tokens") or 0)
     model = str(payload.get("model") or requested_model)
-    prices = GPT55_PRICES if model in {"gpt-5.5", "gpt-5.5-2026-04-23"} else None
+    prices = (
+        GPT55_PRICES
+        if direct_openai_pricing and model in {"gpt-5.5", "gpt-5.5-2026-04-23"}
+        else None
+    )
     cost = None
     pricing_version = None
     if prices is not None:
@@ -164,12 +171,22 @@ def _usage(payload: dict[str, Any], requested_model: str) -> tuple[VerifierUsage
 
 
 class OpenAIVerifierBackend:
-    """Strict, tool-free GPT-5.5 verifier using the OpenAI Responses API."""
-
-    backend_id = "openai"
+    """Strict GPT-5.5 verifier over an explicitly selected Responses endpoint."""
 
     def __init__(self, config: Config, *, http_client: httpx.AsyncClient | None = None):
         self.config = config
+        self.backend_id = config.verifier_provider
+        if config.verifier_provider == "quickrouter":
+            self.provider = "quickrouter"
+            self.api_key = config.quickrouter_api_key
+            base_url = config.verifier_base_url or QUICKROUTER_BASE_URL
+            self.responses_url = base_url.rstrip("/") + "/responses"
+            self.direct_openai_pricing = False
+        else:
+            self.provider = "openai"
+            self.api_key = config.openai_api_key
+            self.responses_url = OPENAI_RESPONSES_URL
+            self.direct_openai_pricing = True
         self._owns_client = http_client is None
         self.http = http_client or httpx.AsyncClient(trust_env=True)
 
@@ -178,10 +195,10 @@ class OpenAIVerifierBackend:
             await self.http.aclose()
 
     async def verify(self, request: VerifierRequest) -> VerifierBackendResult:
-        if self.config.openai_api_key is None:
+        if self.api_key is None:
             raise FabricError(
                 "verifier_authentication_failed",
-                "The OpenAI verifier requires an API key.",
+                "The configured verifier requires an API key.",
             )
         body = {
             "model": self.config.verifier_model,
@@ -207,9 +224,9 @@ class OpenAIVerifierBackend:
         }
         try:
             response = await self.http.post(
-                OPENAI_RESPONSES_URL,
+                self.responses_url,
                 headers={
-                    "Authorization": "Bearer " + self.config.openai_api_key.get_secret_value(),
+                    "Authorization": "Bearer " + self.api_key.get_secret_value(),
                     "Content-Type": "application/json",
                 },
                 json=body,
@@ -227,7 +244,7 @@ class OpenAIVerifierBackend:
             ) from exc
         if response.status_code in {401, 403}:
             raise FabricError(
-                "verifier_authentication_failed", "The OpenAI verifier rejected its credentials."
+                "verifier_authentication_failed", "The verifier provider rejected its credentials."
             )
         if response.status_code == 429:
             error_type, error_code = _api_error_fields(response)
@@ -237,7 +254,7 @@ class OpenAIVerifierBackend:
             }:
                 raise FabricError(
                     "verifier_quota_exhausted",
-                    "The OpenAI verifier account has no available API credit.",
+                    "The verifier provider account has no available API credit.",
                 )
             raise FabricError(
                 "verifier_rate_limited", "The OpenAI verifier is rate limited.", retryable=True
@@ -245,26 +262,30 @@ class OpenAIVerifierBackend:
         if response.status_code in {408, 500, 502, 503, 504}:
             raise FabricError(
                 "verifier_unavailable",
-                "The OpenAI verifier is temporarily unavailable.",
+                "The verifier provider is temporarily unavailable.",
                 retryable=True,
             )
         if response.status_code >= 400:
             raise FabricError(
-                "verifier_request_rejected", "The OpenAI verifier rejected the request."
+                "verifier_request_rejected", "The verifier provider rejected the request."
             )
         try:
             payload = response.json()
             if not isinstance(payload, dict):
                 raise ValueError
             parsed = VerifierResponse.model_validate_json(_output_text(payload))
-            usage, pricing_version = _usage(payload, self.config.verifier_model)
+            usage, pricing_version = _usage(
+                payload,
+                self.config.verifier_model,
+                direct_openai_pricing=self.direct_openai_pricing,
+            )
         except (json.JSONDecodeError, ValidationError, TypeError, ValueError) as exc:
             raise FabricError(
-                "invalid_model_output", "The OpenAI verifier returned invalid structured output."
+                "invalid_model_output", "The verifier provider returned invalid structured output."
             ) from exc
         return VerifierBackendResult(
             response=parsed,
-            provider="openai",
+            provider=self.provider,
             model=self.config.verifier_model,
             model_revision=str(payload.get("model") or self.config.verifier_model),
             response_id=str(payload["id"]) if payload.get("id") else None,

@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Add an explicitly configured GPT-5.5 Responses API verifier with strict structured output, untrusted-evidence prompt isolation, distinct exhausted-credit and transient-rate-limit errors, versioned token-cost accounting, credential-safe diagnostics, and a reproducible opened-development pilot runner. The provider remains disabled by default.
+- Add explicitly configured OpenAI and QuickRouter GPT-5.5 Responses API verification with strict structured output, untrusted-evidence prompt isolation, distinct exhausted-credit and transient-rate-limit errors, direct-provider-only price accounting, credential-safe diagnostics, and a reproducible opened-development pilot runner. The provider remains disabled by default.
 - Add the dependency-injected `VerifierBackend`, a deterministic test backend, backend timeout and failure isolation, validated semantic verdicts, provenance-rich receipts, citation status propagation, and SDK/MCP integration coverage. No hosted model provider is enabled by default.
 - Freeze the candidate 0.2 verifier request/response and provenance contracts, exact atomic-claim spans, evidence allowlist checks, deterministic composite verdict policy, and an executable sealed-holdout promotion gate. The model backend remains unconfigured.
 - Add the experimental `SemanticAssessment` three-axis contract, conservative deterministic verdict policy, strict evidence allowlist/budget validation, public schema and an opened-development evaluation runner. Production `verify_claim` continues to abstain without a configured backend.

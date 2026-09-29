@@ -1,6 +1,6 @@
 # CiteFabric 0.2 semantic verifier contract
 
-状态：接口、Fake Backend、OpenAI Responses API adapter 与验收协议已实现。真实 provider 必须显式启用；默认仍保持 `verify_claim=unavailable`。当前仓库环境未配置 API key，因此尚无真实 GPT-5.5 评分结果。
+状态：接口、Fake Backend、OpenAI/QuickRouter Responses API adapter 与验收协议已实现。真实 provider 必须显式启用；默认仍保持 `verify_claim=unavailable`。
 
 ## 目标
 
@@ -37,7 +37,7 @@
 2. `CiteFabricClient.verify_claim` 已执行 Backend 调用、超时、Schema、atom、Evidence ID、预算和哈希校验。
 3. 合法输出由确定性 policy 生成 verdict 和不可变 Receipt；非法输出、超时、无证据和未配置状态均保存 `unavailable` Receipt 与独立 reason code。
 4. SDK 和 MCP handler 已用 Fake Backend 跑通，默认 CLI 仍拒答，避免测试判断被用户误启用。
-5. [`openai_verifier.py`](../src/citefabric/openai_verifier.py) 使用 Responses API 的严格 JSON Schema 输出，禁用工具与服务端存储，并映射认证、限流、超时、服务故障和非法输出。
+5. [`openai_verifier.py`](../src/citefabric/openai_verifier.py) 使用 Responses API 的严格 JSON Schema 输出，禁用工具与服务端存储，并映射认证、余额耗尽、限流、超时、服务故障和非法输出。
 6. provider、模型快照、reasoning effort、输出预算与凭据已加入配置；`doctor` 只报告凭据是否存在，不输出凭据值。
 7. [`openai_verifier_dev_run.py`](../scripts/openai_verifier_dev_run.py) 对已冻结开发证据执行可复现实验，保存输入哈希、响应 ID、token、费用与 Receipt，并确保 gold 不进入模型请求。
 
@@ -46,7 +46,9 @@ adapter 当前固定默认模型为 `gpt-5.5-2026-04-23`，价格计算按 2026-
 - <https://developers.openai.com/api/docs/models/gpt-5.5>
 - <https://developers.openai.com/api/docs/guides/structured-outputs>
 
-下一步是使用真实凭据运行六条 opened-development pilot，检查结构化输出可靠性、三类错误、延迟和费用。prompt 冻结后才进入全新留出集。
+2026-09-29 已通过 QuickRouter 对固定 `gpt-5.5-2026-04-23` 运行六条 opened-development pilot：6/6 返回合法结构化结果，5/6 与现有 gold 一致。唯一分歧 Q35 为 `contradicted` 与 `insufficient_evidence` 的保守边界，需要独立复核，不能用开发模型输出倒改 gold。QuickRouter 未提供可由 Receipt 独立核实的美元账单金额，因此只记录 token，不套用 OpenAI 直连价格。
+
+下一步是复核 Q35 标注与 contradiction rubric，冻结 prompt 后进入全新留出集。
 
 凭据只从环境变量或本地配置读取，不进入 CLI 参数、日志、Receipt 或测试 fixture。真实模型测试使用手动 CI；普通 PR CI 使用假的确定性 backend。
 

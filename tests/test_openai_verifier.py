@@ -89,6 +89,34 @@ def completed_api_response(request):
     )
 
 
+def completed_quickrouter_response(request):
+    body = json.loads(request.content)
+    assert request.url == "https://api.quickrouter.ai/v1/responses"
+    assert request.headers["authorization"] == "Bearer router-key"
+    assert body["model"] == "gpt-5.5"
+    model_input = json.loads(body["input"])
+    verifier_request = model_input["request"]
+    output = supported_response(
+        verifier_request["atoms"][0]["atom_id"],
+        verifier_request["evidence"][0]["evidence_id"],
+    )
+    return httpx.Response(
+        200,
+        json={
+            "id": "resp_router_123",
+            "status": "completed",
+            "model": "gpt-5.5",
+            "output": [
+                {
+                    "type": "message",
+                    "content": [{"type": "output_text", "text": output.model_dump_json()}],
+                }
+            ],
+            "usage": {"input_tokens": 100, "output_tokens": 50},
+        },
+    )
+
+
 def test_openai_schema_is_strict_and_has_no_defaults():
     schema = strict_response_schema()
 
@@ -137,6 +165,37 @@ async def test_openai_backend_runs_through_client_and_records_usage(tmp_path):
                 "cost": 0.00191,
                 "currency": "USD",
             }
+
+
+async def test_quickrouter_uses_compatible_endpoint_without_openai_price_assumption(tmp_path):
+    transport = httpx.MockTransport(completed_quickrouter_response)
+    config = Config(
+        data_dir=tmp_path / "workspace",
+        offline=True,
+        verifier_provider="quickrouter",
+        verifier_model="gpt-5.5",
+        quickrouter_api_key="router-key",
+    )
+    async with httpx.AsyncClient(transport=transport) as http:
+        async with CiteFabricClient(config, verifier_http_client=http) as client:
+            selector, evidence = await imported_evidence(client, tmp_path)
+            result = await client.verify_claim(
+                "The system reports 42% accuracy.",
+                selector,
+                evidence_ids=[evidence["evidence_id"]],
+            )
+            doctor = await client.doctor()
+
+    assessment = result.data["receipts"][0]["assessment"]
+    assert assessment["verdict"] == "supported"
+    assert assessment["verifier"]["provider"] == "quickrouter"
+    assert assessment["verifier"]["pricing_version"] is None
+    assert assessment["usage"]["cost"] is None
+    assert doctor.data["verifier_config"] == {
+        "provider": "quickrouter",
+        "model": "gpt-5.5",
+        "credentials_configured": True,
+    }
 
 
 @pytest.mark.parametrize(

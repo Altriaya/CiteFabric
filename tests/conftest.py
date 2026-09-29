@@ -5,6 +5,21 @@ from citefabric.models import Author, ExternalID, Issued, SourceRecord
 from citefabric.storage import Store
 
 
+@pytest.fixture(autouse=True)
+def isolate_user_configuration(monkeypatch, tmp_path):
+    """Tests must never inherit developer credentials or hosted backends."""
+
+    monkeypatch.setenv("CITEFABRIC_CONFIG", str(tmp_path / "no-user-config.toml"))
+    for name in (
+        "CITEFABRIC_OPENAI_API_KEY",
+        "CITEFABRIC_QUICKROUTER_API_KEY",
+        "CITEFABRIC_VERIFIER_PROVIDER",
+        "OPENAI_API_KEY",
+        "QUICKROUTER_API_KEY",
+    ):
+        monkeypatch.delenv(name, raising=False)
+
+
 @pytest.fixture
 def config(tmp_path):
     return Config(data_dir=tmp_path / "workspace", offline=True)

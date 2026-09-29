@@ -77,7 +77,7 @@ def configured_verifier_backend(config: Config, http_client=None) -> VerifierBac
 
     if config.verifier_provider == "none":
         return None
-    if config.verifier_provider == "openai":
+    if config.verifier_provider in {"openai", "quickrouter"}:
         from .openai_verifier import OpenAIVerifierBackend
 
         return OpenAIVerifierBackend(config, http_client=http_client)

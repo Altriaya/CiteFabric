@@ -1328,17 +1328,22 @@ class CiteFabricClient:
                 openalex=bool(self.config.openalex_api_key),
                 semantic_scholar=bool(self.config.semantic_scholar_api_key),
                 openai=bool(self.config.openai_api_key),
+                quickrouter=bool(self.config.quickrouter_api_key),
             ),
             verifier_config=dict(
                 provider=self.config.verifier_provider,
                 model=(
                     self.config.verifier_model
-                    if self.config.verifier_provider == "openai"
+                    if self.config.verifier_provider in {"openai", "quickrouter"}
                     else None
                 ),
-                credentials_configured=bool(self.config.openai_api_key)
-                if self.config.verifier_provider == "openai"
-                else None,
+                credentials_configured=(
+                    bool(self.config.openai_api_key)
+                    if self.config.verifier_provider == "openai"
+                    else bool(self.config.quickrouter_api_key)
+                    if self.config.verifier_provider == "quickrouter"
+                    else None
+                ),
             ),
         )
         if online:

@@ -50,7 +50,7 @@ uv run citefabric --data-dir .citefabric/my-project verify "claim" --paper FABRI
 
 默认配置下 verify 返回 `unavailable / verifier_not_configured`，但凭据会保留真实原文、定位、文档哈希和 grounding 状态。
 
-主线已提供 0.2 开发用的依赖注入 `VerifierBackend`、确定性 Fake Backend 和显式启用的 OpenAI Responses API adapter。真实 adapter 使用严格结构化输出，只把冻结的 claim 与 evidence bundle 交给模型；最终 verdict 仍由本地确定性策略生成。Fake Backend 不能通过普通 CLI 配置启用，真实 provider 默认也保持关闭。设计与当前进度见 [0.2 verifier 设计](docs/verifier-0.2-design.md)。
+主线已提供 0.2 开发用的依赖注入 `VerifierBackend`、确定性 Fake Backend，以及显式启用的 OpenAI 和 QuickRouter Responses API adapter。真实 adapter 使用严格结构化输出，只把冻结的 claim 与 evidence bundle 交给模型；最终 verdict 仍由本地确定性策略生成。Fake Backend 不能通过普通 CLI 配置启用，真实 provider 默认也保持关闭。设计与当前进度见 [0.2 verifier 设计](docs/verifier-0.2-design.md)。
 
 `find_evidence` 的 `query_rewrite="english_faithful"` 是默认关闭的实验接口。它只在调用方配置受审计的改写器时使用英文候选；会记录原问句、改写、模型、提示词版本和校验结果。数字、比较符号、拉丁术语或显式否定词丢失时，改写被拒绝并回退原问题。该校验不证明完整语义等价，也不启用语义 verdict。
 
@@ -109,6 +109,7 @@ request_timeout = 8
 verifier_timeout = 30
 verifier_provider = "none"
 verifier_model = "gpt-5.5-2026-04-23"
+# verifier_base_url = "https://api.quickrouter.ai/v1"
 verifier_reasoning_effort = "medium"
 verifier_max_output_tokens = 4096
 max_pages = 300
@@ -125,6 +126,8 @@ offline = false
 - `CITEFABRIC_OFFLINE=true`：仅使用本地数据与缓存。
 - `CITEFABRIC_VERIFIER_PROVIDER=openai`：显式启用 OpenAI 语义 verifier。
 - `CITEFABRIC_OPENAI_API_KEY`：verifier 凭据；未设置时也会读取标准 `OPENAI_API_KEY`。
+- `CITEFABRIC_VERIFIER_PROVIDER=quickrouter`、`CITEFABRIC_QUICKROUTER_API_KEY`：使用 QuickRouter 的 Responses 兼容端点；也可读取 `QUICKROUTER_API_KEY`。
+- `CITEFABRIC_VERIFIER_BASE_URL`：覆盖兼容 provider 的 Base URL。
 - `CITEFABRIC_VERIFIER_MODEL`、`CITEFABRIC_VERIFIER_REASONING_EFFORT`：固定模型快照与推理强度。
 
 凭据不通过命令行传入，也不会出现在 doctor 输出中。`doctor --online` 才会执行联网探针。
@@ -136,7 +139,7 @@ uv run python scripts/openai_verifier_dev_run.py --preflight
 CITEFABRIC_OPENAI_API_KEY=... uv run python scripts/openai_verifier_dev_run.py
 ```
 
-默认 pilot 固定 6 条、覆盖 5 篇论文和三种 verdict；使用 `--case Q01` 可缩小范围，使用 `--all` 才运行全部 38 条。runner 会保存输入文件哈希、模型/提示词版本、完整 Receipt、token 与费用。该数据集已经用于开发，结果只用于调试，不能作为 promotion 证据。
+默认 pilot 固定 6 条、覆盖 5 篇论文和三种 verdict；使用 `--case Q01` 可缩小范围，使用 `--all` 才运行全部 38 条。runner 会保存输入文件哈希、模型/提示词版本、完整 Receipt、token 与 provider 可核实的费用。第三方兼容端点不套用 OpenAI 官方价格，费用保持为空。该数据集已经用于开发，结果只用于调试，不能作为 promotion 证据。
 
 CLI 退出码：0=ok/no_results，2=参数错误，3=partial，4=failed。`--json` 输出完整业务 Result；命令语法错误使用 CLI 自身的 stderr 诊断。
 
