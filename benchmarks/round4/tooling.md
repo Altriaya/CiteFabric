@@ -121,3 +121,5 @@ uv run --locked python scripts/round4_paired_review.py score \
 ```
 
 15 篇、150 intents 的正式批次因此包含 300 个双语 pair、600 个 evidence candidate。它只回答 v2/v6 的语义版本决策，不给 v3/v4/v5 排名，也不把模型自评冒充独立人工复核。
+
+若需在人工评分前运行模型会话诊断，可使用 `scripts/round4_ai_review.py`。它不接受或读取私钥，支持小批量并发、逐批 journal 和断点续跑；两份初评完成后可传入 `--review-a/--review-b`，只仲裁分歧 candidate。模型评分始终写入 `reviewer_kind=model_session`、`promotion_eligible=false`，不得填写或冒充真人身份。兼容 provider 可能在 nullable boolean 上返回 `false`/`null` 混淆；工具对非适用项规范化为 `null`，对缺失的必要 limitation 判断保守记为 `false`，并在报告中公开该规则。
