@@ -20,6 +20,18 @@ UV_DEFAULT_INDEX=https://pypi.org/simple uv run --locked python scripts/round4_s
 
 下列命令省略源覆盖前缀；若本机设置了镜像环境变量，仍需在每条命令前加 `UV_DEFAULT_INDEX=https://pypi.org/simple`，或在当前终端先执行 `export UV_DEFAULT_INDEX=https://pypi.org/simple`。
 
+正式候选先生成不含 verdict 的 authoring worksheet。promotion profile 会在检测到 References/Bibliography 标题后停止取样，过滤独立引用条目，并在 narrative、material、scope/condition 三层间轮转取样；候选不是 gold，不能提供给检索器：
+
+```bash
+uv run --locked python scripts/round4_holdout_authoring.py --input-dir PRIVATE/pdfs --workspace PRIVATE/authoring-workspace --output PRIVATE/worksheet.json --profile promotion --candidates-per-paper 24
+```
+
+queries/gold 完成独立复核并准备出固定 extraction 后，使用 promotion fixture audit 检查 15/150 规模、每篇 4 supported / 3 contradicted / 3 insufficient、风险层、参考文献泄漏和复核记录。它只能核对声明与文件关系，不能证明审阅者身份或真实独立性：
+
+```bash
+uv run --locked python scripts/round4_promotion_fixture.py --queries PRIVATE/queries.json --gold PRIVATE/gold.json --input-dir PRIVATE/pdfs --extractions PRIVATE/prepared/extractions.json --output PRIVATE/fixture-audit.json
+```
+
 ```bash
 uv run --locked python scripts/round4_eval.py validate --queries PRIVATE/queries.json --input-dir data_test
 uv run --locked python scripts/round4_eval.py prepare --queries PRIVATE/queries.json --input-dir data_test --output-dir output/validation/round4/pilot-prepared
