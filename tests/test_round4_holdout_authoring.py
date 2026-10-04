@@ -2,6 +2,7 @@ from scripts.round4_holdout_authoring import (
     bibliography_like,
     bibliography_start,
     candidate_stratum,
+    non_evidence_start,
     select_candidates,
 )
 
@@ -11,6 +12,8 @@ def test_bibliography_filters_heading_and_standalone_entry():
     assert bibliography_start("Related work discusses references in prose.") is None
     assert bibliography_like("[12] Smith, J. et al. A study. arXiv:2101.00001 (2021).")
     assert not bibliography_like("We compare with Smith et al. (2021) and improve accuracy by 4%.")
+    assert non_evidence_start("Results.\n\nAcknowledgements\nWe thank the reviewers.") == 9
+    assert non_evidence_start("We acknowledge that the sample is small.") is None
 
 
 def test_candidate_strata_and_balanced_selection():

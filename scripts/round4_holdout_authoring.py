@@ -25,6 +25,10 @@ REFERENCE_ENTRY = re.compile(
     r"(?:19|20)\d{2}[a-z]?(?:[.,;)]|\s)"
 )
 REFERENCE_MARKERS = re.compile(r"(?i)\b(?:doi:|https?://|arxiv:|et al\.)\b")
+NON_EVIDENCE_HEADING = re.compile(
+    r"(?im)^\s*(?:acknowledg(?:e)?ments?|author contributions?|competing interests?|"
+    r"conflicts? of interest|funding|data availability)\s*$"
+)
 
 
 def sentences(text: str):
@@ -62,6 +66,13 @@ def bibliography_start(text: str) -> int | None:
     """Return the first bibliography heading offset, if this page contains one."""
 
     match = REFERENCE_HEADING.search(text)
+    return match.start() if match else None
+
+
+def non_evidence_start(text: str) -> int | None:
+    """Return a local metadata/administrative section offset on this page."""
+
+    match = NON_EVIDENCE_HEADING.search(text)
     return match.start() if match else None
 
 
@@ -152,9 +163,13 @@ async def build(
             in_bibliography = False
             for unit_index, unit in enumerate(snapshot.text_units):
                 heading_offset = bibliography_start(unit.text)
+                administrative_offset = non_evidence_start(unit.text)
                 for start, end, quote in sentences(unit.text):
                     if in_bibliography or (heading_offset is not None and start >= heading_offset):
                         rejected["bibliography_section"] += 1
+                        continue
+                    if administrative_offset is not None and start >= administrative_offset:
+                        rejected["administrative_section"] += 1
                         continue
                     if bibliography_like(quote):
                         rejected["bibliography_entry"] += 1
@@ -205,7 +220,7 @@ async def build(
                 "status": "needs_human_or_model_authored_queries_and_gold",
                 "warning": "Candidates are not labels and must not be supplied to retrieval.",
                 "promotion_profile": promotion_profile,
-                "candidate_filter": "bibliography-section-and-entry-v1",
+                "candidate_filter": "bibliography-and-administrative-sections-v2",
                 "papers": papers,
             },
             ensure_ascii=False,
