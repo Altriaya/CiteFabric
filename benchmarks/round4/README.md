@@ -14,6 +14,7 @@
 10. [自然中文多语检索实验](natural-chinese-multilingual-results.md)：比较 v2、本地 E5、RRF 与跨编码器，记录默认预算收益及 insufficient 暴露风险。
 11. [v6 新论文盲测 pilot](offline-v6-new-paper-pilot.md)：6 篇此前未使用的论文、60 条双语 supported intent，验证基线不变量并量化 material 路由的收益与回归。
 12. [v6 promotion 留出实验](offline-v6-promotion-holdout-results.md)：15 篇、150 条模型会话预审 fixture 和 6,000 次离线回放；v6 中文机械覆盖小幅上升、英文回归，未通过默认升级门槛。
+13. [v2/v6 配对语义盲审准备](paired-v2-v6-review-setup.md)：从同一封存运行派生 300 组、600 份匿名证据结果，完成评分模板、私钥映射和完整性校验；等待双人人工评分。
 
 开发结果页同时记录了三轴语义判断契约实验。对应公共实现为 `src/citefabric/semantic.py` 和 `scripts/semantic_contract_eval.py`；它们定义并评测未来 verifier 的输出政策，不改变 0.1 的 `verify_claim=unavailable` 行为。
 

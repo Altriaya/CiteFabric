@@ -87,3 +87,37 @@ uv run --locked python scripts/round4_eval.py score --run-dir output/validation/
 成本计规范化完整 JSON-RPC 响应 UTF-8 字节；包含 content/structuredContent 双份内容和请求 id。另计一次完整证据资源回读后的审计总字节。它不是原始管道抓包，不计请求方向流量，也不换算成 token 或费用。每个 intent 先取三次 warm 中位耗时，再求 p95。导入失败的时间缺失会单列 timed_intents，不能据较低均值批准成本 gate。
 
 promotion 固定为 not_evaluated：评分工具不能替代独立保管证明、累计语料审查、G1 的迁移/兼容性检查及完整 gate 决策。真实 pilot 的目标是发现 failure modes；合成演示的分数不得合并进真实 pilot。
+
+### v2/v6 配对盲审
+
+当版本决策已经收敛到 v2 与 v6 时，可从同一封存运行派生较小的配对包。每个 intent/语言组成一组，A/B 顺序分别随机；公开给评审者的目录包含冻结 verdict、必要条件和最小充分集合，便于一致应用 rubric，但不包含策略名、trace、耗时或真实 evidence ID。私钥仍须放在评审目录之外：
+
+```bash
+uv run --locked python scripts/round4_paired_review.py build \
+  --run-dir PRIVATE/run \
+  --gold PRIVATE/gold.json \
+  --output-dir PRIVATE/paired-review \
+  --private-key PRIVATE/paired-key.json
+
+uv run --locked python scripts/round4_paired_review.py validate \
+  --run-dir PRIVATE/run \
+  --gold PRIVATE/gold.json \
+  --package PRIVATE/paired-review/items.json \
+  --private-key PRIVATE/paired-key.json
+```
+
+两位评审者分别复制 `rating-template.json`，填写 reviewer declaration 和全部 A/B 评分。若一组的 `candidate_evidence_identical=true`，A/B 仍各保留一条评分记录以维持完整的策略矩阵，但评审者可以在确认原文完全相同后复用判断。存在分歧时，第三位仲裁者提交一份完整评分、声明已看过其他评分；工具只在分歧 candidate 上采用仲裁结果：
+
+```bash
+uv run --locked python scripts/round4_paired_review.py score \
+  --run-dir PRIVATE/run \
+  --gold PRIVATE/gold.json \
+  --package PRIVATE/paired-review/items.json \
+  --private-key PRIVATE/paired-key.json \
+  --review PRIVATE/reviewer-a.json \
+  --review PRIVATE/reviewer-b.json \
+  --adjudication PRIVATE/adjudicator.json \
+  --output PRIVATE/paired-scores.json
+```
+
+15 篇、150 intents 的正式批次因此包含 300 个双语 pair、600 个 evidence candidate。它只回答 v2/v6 的语义版本决策，不给 v3/v4/v5 排名，也不把模型自评冒充独立人工复核。
