@@ -1,0 +1,52 @@
+name: Publish CiteFabric 0.1.0 to PyPI
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Build and publish the v0.1.0 tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: pypi
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      PYTHONUTF8: "1"
+      UV_DEFAULT_INDEX: https://pypi.org/simple
+    steps:
+      - name: Check out the audited release tag
+        uses: actions/checkout@v4
+        with:
+          ref: v0.1.0
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "0.11.21"
+          python-version: "3.13"
+
+      - name: Verify tag and project version
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git describe --tags --exact-match HEAD)" = "v0.1.0"
+          test "$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')" = "0.1.0"
+
+      - name: Build distributions
+        run: uv build
+
+      - name: Check distribution metadata
+        run: uv tool run --from twine twine check dist/*
+
+      - name: Publish using PyPI Trusted Publishing
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
