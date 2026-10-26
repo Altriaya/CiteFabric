@@ -4,7 +4,18 @@
 
 CiteFabric 提供多源论文搜索、版本身份、可重放文本证据和引用溯源，支持 Python SDK、CLI 和五个 MCP 工具。
 
-**当前状态：已发布 GitHub v0.1.0，尚未发布到 PyPI。** 本版本没有语义论断验证器，相关段落不等于支持论断。
+**当前状态：已发布 [GitHub v0.1.0](https://github.com/Altriaya/CiteFabric/releases/tag/v0.1.0) 和 [PyPI citefabric 0.1.0](https://pypi.org/project/citefabric/0.1.0/)。** 本版本提供论文搜索、本地证据检索和出处回放；没有语义论断验证器，不会自动判定论断真假。
+
+## 从 PyPI 安装
+
+需要 Python 3.11 或更高版本。建议在虚拟环境中安装：
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install citefabric==0.1.0
+citefabric doctor --json
+```
 
 ## 从源码运行
 
